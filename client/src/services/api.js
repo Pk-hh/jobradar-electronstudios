@@ -95,11 +95,18 @@ export const adminApi = {
   uploadFile: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
+    const headers = getAuthHeaders();
+    delete headers['Content-Type'];
     const res = await fetch('/api/admin/upload', {
       method: 'POST',
+      headers,
       body: formData
     });
-    return res.json();
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to upload file');
+    }
+    return data;
   },
   createJob: (jobData) =>
     request('/admin/jobs', {

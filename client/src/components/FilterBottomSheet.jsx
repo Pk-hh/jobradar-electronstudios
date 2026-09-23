@@ -31,9 +31,9 @@ export default function FilterBottomSheet({ isOpen, onClose, filters, onApplyFil
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/70 backdrop-blur-sm animate-fade-in p-0 sm:p-4">
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-slate-950/70 backdrop-blur-sm animate-fade-in p-0 sm:p-4">
       <div
-        className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl max-h-[85vh] flex flex-col overflow-hidden shadow-2xl animate-slide-up border border-slate-200/90"
+        className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl max-h-[88vh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl animate-slide-up border border-slate-200/90"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

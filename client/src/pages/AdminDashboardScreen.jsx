@@ -418,23 +418,34 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
                 </div>
               </div>
 
-              {/* Company Logo Firebase Upload Component */}
-              <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-1.5">
-                <label className="font-bold text-[#111111] block flex items-center gap-1.5">
-                  <Image size={15} className="text-[#FF6B00]" /> Company Logo (Upload to Firebase Cloud Storage)
-                </label>
+              {/* Company Logo URL or Upload */}
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <Image size={15} className="text-[#FF6B00]" /> Company Logo Image Link / URL
+                  </label>
+                  <span className="text-[10px] text-slate-500">Paste URL or upload</span>
+                </div>
                 <div className="flex items-center gap-2">
                   <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileUpload(e, 'logo')}
-                    className="text-xs flex-1 text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#FF6B00] file:text-white cursor-pointer"
+                    type="url"
+                    value={formData.logo || ''}
+                    onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                    placeholder="https://example.com/logo.png"
+                    className="flex-1 p-2 bg-white border border-slate-300 rounded-lg text-xs font-mono focus:outline-none focus:border-[#FF6B00]"
                   />
-                  {uploading && <span className="text-[10px] text-[#FF6B00] font-bold">Uploading to Firebase...</span>}
+                  <label className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold cursor-pointer flex items-center gap-1 flex-shrink-0 transition-all">
+                    <Upload size={13} />
+                    <span>Upload</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileUpload(e, 'logo')}
+                      className="hidden"
+                    />
+                  </label>
                 </div>
-                {formData.logo && (
-                  <p className="text-[10px] font-mono text-gray-500 truncate">Logo URL: {formData.logo}</p>
-                )}
+                {uploading && <p className="text-[10px] text-[#FF6B00] font-bold">Uploading image...</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-2">
@@ -491,22 +502,34 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
                 </div>
               </div>
 
-              {/* Official PDF Document Firebase Upload */}
-              <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-1.5">
-                <label className="font-bold text-[#111111] block flex items-center gap-1.5">
-                  <FileText size={15} className="text-[#FF6B00]" /> Official PDF Gazette / Advertisement Upload
-                </label>
+              {/* Official PDF Gazette / Advertisement Link or Upload */}
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <FileText size={15} className="text-[#FF6B00]" /> Official PDF Gazette / Notification Link
+                  </label>
+                  <span className="text-[10px] text-slate-500">Paste PDF URL or upload</span>
+                </div>
                 <div className="flex items-center gap-2">
                   <input
-                    type="file"
-                    accept=".pdf,image/*"
-                    onChange={(e) => handleFileUpload(e, 'official_notification_url')}
-                    className="text-xs flex-1 text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#FF6B00] file:text-white cursor-pointer"
+                    type="url"
+                    value={formData.official_notification_url || ''}
+                    onChange={(e) => setFormData({ ...formData, official_notification_url: e.target.value })}
+                    placeholder="https://example.com/notification-gazette.pdf"
+                    className="flex-1 p-2 bg-white border border-slate-300 rounded-lg text-xs font-mono focus:outline-none focus:border-[#FF6B00]"
                   />
+                  <label className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold cursor-pointer flex items-center gap-1 flex-shrink-0 transition-all">
+                    <Upload size={13} />
+                    <span>Upload</span>
+                    <input
+                      type="file"
+                      accept=".pdf,image/*"
+                      onChange={(e) => handleFileUpload(e, 'official_notification_url')}
+                      className="hidden"
+                    />
+                  </label>
                 </div>
-                {formData.official_notification_url && (
-                  <p className="text-[10px] font-mono text-gray-500 truncate">PDF Storage URL: {formData.official_notification_url}</p>
-                )}
+                {uploading && <p className="text-[10px] text-[#FF6B00] font-bold">Uploading document...</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-2">

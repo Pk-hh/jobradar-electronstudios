@@ -25,33 +25,36 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
   const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  // Form State
-  const [formData, setFormData] = useState({
+  // Empty Form State for manual entry
+  const emptyFormState = {
     title: '',
     company: '',
     logo: '',
     description: '',
     category: 'Jobs',
-    sub_category: 'Software',
+    sub_category: '',
     type: 'Full Time',
-    location: 'Hyderabad',
+    location: '',
     work_mode: 'On-site',
-    salary: '₹4-6 LPA',
+    salary: '',
     stipend: '',
-    experience: 'Fresher (0-1 Yrs)',
-    qualification: 'B.Tech / B.E',
-    branch: 'CSE, IT, ECE',
-    skills: 'React, Node.js, SQL',
-    eligibility: 'No active backlogs. Min 60%',
-    vacancies: 10,
-    application_deadline: new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0],
-    selection_process: '1. Online Test\n2. Technical Interview',
+    experience: '',
+    qualification: '',
+    branch: '',
+    skills: '',
+    eligibility: '',
+    vacancies: '',
+    application_deadline: '',
+    selection_process: '',
     official_notification_url: '',
-    application_url: 'https://example.com/apply',
-    source: 'Firebase Storage',
+    application_url: '',
+    source: '',
     status: 'Published',
     verified: true
-  });
+  };
+
+  // Form State
+  const [formData, setFormData] = useState(emptyFormState);
 
   // Broadcast Notif Form State
   const [notifData, setNotifData] = useState({
@@ -110,7 +113,7 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
         ...formData,
         skills: skillsArray,
         status: statusOverride || formData.status,
-        vacancies: parseInt(formData.vacancies) || 1
+        vacancies: formData.vacancies ? parseInt(formData.vacancies) : 0
       };
 
       if (editingJob) {
@@ -121,6 +124,7 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
 
       setIsJobModalOpen(false);
       setEditingJob(null);
+      setFormData(emptyFormState);
       fetchAdminData();
     } catch (err) {
       alert(err.message || 'Failed to save job');
@@ -235,6 +239,7 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
           <button
             onClick={() => {
               setEditingJob(null);
+              setFormData(emptyFormState);
               setIsJobModalOpen(true);
             }}
             className="w-full sm:flex-1 py-2.5 px-4 bg-[#FF6B00] hover:bg-[#E05E00] text-white font-bold text-xs md:text-sm rounded-xl shadow-xs flex items-center justify-center gap-2 transition-all"
@@ -334,14 +339,15 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
                 </div>
 
                 <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs text-slate-500 gap-2 flex-wrap">
-                  <span className="font-normal">Deadline: {new Date(job.application_deadline).toLocaleDateString()}</span>
-                  <span className="font-normal">Views: {job.views_count} | Apply Clicks: {job.clicks_count}</span>
+                  <span className="font-normal">Deadline: {job.application_deadline ? new Date(job.application_deadline).toLocaleDateString() : 'N/A'}</span>
+                  <span className="font-normal">Views: {job.views_count || 0} | Apply Clicks: {job.clicks_count || 0}</span>
 
                   <div className="flex items-center gap-3 font-semibold">
                     <button
                       onClick={() => {
                         setEditingJob(job);
                         setFormData({
+                          ...emptyFormState,
                           ...job,
                           skills: Array.isArray(job.skills) ? job.skills.join(', ') : job.skills || ''
                         });
@@ -371,29 +377,31 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
           <div className="w-full max-w-lg bg-white rounded-2xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4 text-xs">
             <h3 className="font-extrabold text-base text-[#111111]">
-              {editingJob ? 'Edit Job Notification' : 'Create Opportunity & Upload to Firebase Storage'}
+              {editingJob ? 'Edit Job Notification' : 'Create Opportunity (Manual Data Entry)'}
             </h3>
 
             <div className="space-y-3">
               <div>
-                <label className="font-bold block mb-1">Job / Notice Title</label>
+                <label className="font-bold block mb-1">Job / Notice Title *</label>
                 <input
                   type="text"
+                  required
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Software Engineer – Fresher"
+                  placeholder="e.g. Software Engineer, Assistant Manager"
                   className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="font-bold block mb-1">Company / Organization</label>
+                  <label className="font-bold block mb-1">Company / Organization *</label>
                   <input
                     type="text"
+                    required
                     value={formData.company}
                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                    placeholder="ABC Technologies"
+                    placeholder="e.g. Infosys, TCS, ISRO"
                     className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
                   />
                 </div>
@@ -415,6 +423,153 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
                     <option value="Apprenticeships">Apprenticeships</option>
                     <option value="Campus Jobs">Campus Jobs</option>
                   </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="font-bold block mb-1">Sub Category</label>
+                  <input
+                    type="text"
+                    value={formData.sub_category}
+                    onChange={(e) => setFormData({ ...formData, sub_category: e.target.value })}
+                    placeholder="e.g. Software, SSC, UPSC, Banking, Mechanical"
+                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold block mb-1">Job Type</label>
+                  <select
+                    value={formData.type}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
+                  >
+                    <option value="Full Time">Full Time</option>
+                    <option value="Internship">Internship</option>
+                    <option value="Apprenticeship">Apprenticeship</option>
+                    <option value="Contract">Contract</option>
+                    <option value="Part Time">Part Time</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="font-bold block mb-1">Work Mode</label>
+                  <select
+                    value={formData.work_mode}
+                    onChange={(e) => setFormData({ ...formData, work_mode: e.target.value })}
+                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
+                  >
+                    <option value="On-site">On-site</option>
+                    <option value="Remote">Remote</option>
+                    <option value="Hybrid">Hybrid</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-bold block mb-1">Location</label>
+                  <input
+                    type="text"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    placeholder="e.g. Hyderabad, Bengaluru, Pan India"
+                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="font-bold block mb-1">Salary / Compensation</label>
+                  <input
+                    type="text"
+                    value={formData.salary}
+                    onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
+                    placeholder="e.g. ₹4.5 - 6 LPA, Level 7 Pay Matrix"
+                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold block mb-1">Experience Required</label>
+                  <input
+                    type="text"
+                    value={formData.experience}
+                    onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
+                    placeholder="e.g. Fresher (0-1 Yrs), 2+ Years"
+                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="font-bold block mb-1">Qualification Required</label>
+                  <input
+                    type="text"
+                    value={formData.qualification}
+                    onChange={(e) => setFormData({ ...formData, qualification: e.target.value })}
+                    placeholder="e.g. B.Tech / B.E, Any Graduate, 12th Pass"
+                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold block mb-1">Branch / Stream</label>
+                  <input
+                    type="text"
+                    value={formData.branch}
+                    onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
+                    placeholder="e.g. CSE, IT, ECE, Civil, All Branches"
+                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold block mb-1">Required Technical Skills (Comma separated)</label>
+                <input
+                  type="text"
+                  value={formData.skills}
+                  onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
+                  placeholder="e.g. Java, Python, React, SQL"
+                  className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold block mb-1">Detailed Eligibility Criteria</label>
+                <textarea
+                  rows={2}
+                  value={formData.eligibility}
+                  onChange={(e) => setFormData({ ...formData, eligibility: e.target.value })}
+                  placeholder="e.g. Minimum 60% in graduation. Age limit: 18-30 yrs."
+                  className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="font-bold block mb-1">Application Deadline</label>
+                  <input
+                    type="date"
+                    value={formData.application_deadline ? formData.application_deadline.split('T')[0] : ''}
+                    onChange={(e) => setFormData({ ...formData, application_deadline: e.target.value })}
+                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold block mb-1">Open Vacancies</label>
+                  <input
+                    type="number"
+                    value={formData.vacancies}
+                    onChange={(e) => setFormData({ ...formData, vacancies: e.target.value })}
+                    placeholder="e.g. 50"
+                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
+                  />
                 </div>
               </div>
 
@@ -448,60 +603,6 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
                 {uploading && <p className="text-[10px] text-[#FF6B00] font-bold">Uploading image...</p>}
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="font-bold block mb-1">Job Type</label>
-                  <select
-                    value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
-                  >
-                    <option value="Full Time">Full Time</option>
-                    <option value="Internship">Internship</option>
-                    <option value="Apprenticeship">Apprenticeship</option>
-                    <option value="Contract">Contract</option>
-                    <option value="Part Time">Part Time</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="font-bold block mb-1">Work Mode</label>
-                  <select
-                    value={formData.work_mode}
-                    onChange={(e) => setFormData({ ...formData, work_mode: e.target.value })}
-                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
-                  >
-                    <option value="On-site">On-site</option>
-                    <option value="Remote">Remote</option>
-                    <option value="Hybrid">Hybrid</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="font-bold block mb-1">Location</label>
-                  <input
-                    type="text"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    placeholder="Hyderabad"
-                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold block mb-1">Salary / Stipend</label>
-                  <input
-                    type="text"
-                    value={formData.salary || formData.stipend || ''}
-                    onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
-                    placeholder="₹4-6 LPA or ₹30,000 / mo"
-                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
-                  />
-                </div>
-              </div>
-
               {/* Official PDF Gazette / Advertisement Link or Upload */}
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5">
                 <div className="flex items-center justify-between">
@@ -532,30 +633,8 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
                 {uploading && <p className="text-[10px] text-[#FF6B00] font-bold">Uploading document...</p>}
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="font-bold block mb-1">Application Deadline</label>
-                  <input
-                    type="date"
-                    value={formData.application_deadline ? formData.application_deadline.split('T')[0] : ''}
-                    onChange={(e) => setFormData({ ...formData, application_deadline: e.target.value })}
-                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
-                  />
-                </div>
-
-                <div>
-                  <label className="font-bold block mb-1">Vacancies</label>
-                  <input
-                    type="number"
-                    value={formData.vacancies}
-                    onChange={(e) => setFormData({ ...formData, vacancies: e.target.value })}
-                    className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
-                  />
-                </div>
-              </div>
-
               <div>
-                <label className="font-bold block mb-1">Official Application URL</label>
+                <label className="font-bold block mb-1">Official Application Link / URL *</label>
                 <input
                   type="url"
                   required
@@ -567,11 +646,23 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
               </div>
 
               <div>
-                <label className="font-bold block mb-1">Job Description</label>
+                <label className="font-bold block mb-1">Source Provider</label>
+                <input
+                  type="text"
+                  value={formData.source}
+                  onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+                  placeholder="e.g. Official Website, Recruiter Direct, Central Gazette"
+                  className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold block mb-1">Job Description & Context</label>
                 <textarea
                   rows={3}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Enter detailed job description, responsibilities, etc."
                   className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
                 />
               </div>
@@ -582,6 +673,7 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
                   rows={2}
                   value={formData.selection_process || ''}
                   onChange={(e) => setFormData({ ...formData, selection_process: e.target.value })}
+                  placeholder="e.g. 1. Online Test  2. Technical Interview  3. HR Round"
                   className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
                 />
               </div>

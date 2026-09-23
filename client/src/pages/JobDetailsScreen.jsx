@@ -140,40 +140,42 @@ export default function JobDetailsScreen() {
         <div className="bg-gradient-to-br from-orange-50/80 to-amber-50/40 p-4 rounded-2xl border border-orange-200/70 shadow-2xs space-y-1">
           <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider block">Compensation</span>
           <span className="font-black text-[#FF6B00] text-sm block truncate">
-            {job.salary || job.stipend || 'As per norms'}
+            {job.salary || job.stipend || 'Not Specified'}
           </span>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
           <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider block">Experience</span>
-          <span className="font-extrabold text-slate-900 text-xs block truncate">{job.experience}</span>
+          <span className="font-extrabold text-slate-900 text-xs block truncate">{job.experience || 'Not Specified'}</span>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
           <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider block">Job Type</span>
-          <span className="font-extrabold text-slate-900 text-xs block truncate">{job.type}</span>
+          <span className="font-extrabold text-slate-900 text-xs block truncate">{job.type || 'Full Time'}</span>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1">
           <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider block">Deadline</span>
-          <span className="font-extrabold text-slate-900 text-xs block truncate">{deadlineDate}</span>
+          <span className="font-extrabold text-slate-900 text-xs block truncate">{job.application_deadline ? deadlineDate : 'Open'}</span>
         </div>
       </div>
 
       {/* Structured Details Sections */}
       <div className="mx-4 sm:mx-6 md:mx-8 lg:mx-12 bg-white rounded-3xl p-6 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.06)] border border-slate-200/90 space-y-6 text-xs text-slate-800">
         {/* Section: Qualification & Eligibility */}
-        <div className="space-y-3 pb-5 border-b border-slate-100">
-          <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider text-[#FF6B00] flex items-center gap-2">
-            <Award size={16} /> Eligibility & Criteria
-          </h3>
-          <div className="space-y-2 text-xs font-medium text-slate-700">
-            <p><span className="font-bold text-slate-900">Qualification:</span> {job.qualification || 'Any Graduate'}</p>
-            <p><span className="font-bold text-slate-900">Branch / Stream:</span> {job.branch || 'All Streams'}</p>
-            {job.eligibility && <p><span className="font-bold text-slate-900">Detailed Criteria:</span> {job.eligibility}</p>}
-            {job.vacancies > 0 && <p><span className="font-bold text-slate-900">Open Vacancies:</span> {job.vacancies}</p>}
+        {(job.qualification || job.branch || job.eligibility || (job.vacancies && job.vacancies > 0)) && (
+          <div className="space-y-3 pb-5 border-b border-slate-100">
+            <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider text-[#FF6B00] flex items-center gap-2">
+              <Award size={16} /> Eligibility & Criteria
+            </h3>
+            <div className="space-y-2 text-xs font-medium text-slate-700">
+              {job.qualification && <p><span className="font-bold text-slate-900">Qualification:</span> {job.qualification}</p>}
+              {job.branch && <p><span className="font-bold text-slate-900">Branch / Stream:</span> {job.branch}</p>}
+              {job.eligibility && <p><span className="font-bold text-slate-900">Detailed Criteria:</span> {job.eligibility}</p>}
+              {job.vacancies > 0 && <p><span className="font-bold text-slate-900">Open Vacancies:</span> {job.vacancies}</p>}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Section: Required Skills */}
         {job.skills && job.skills.length > 0 && (
@@ -192,12 +194,14 @@ export default function JobDetailsScreen() {
         )}
 
         {/* Section: Job Description */}
-        <div className="space-y-3 pb-5 border-b border-slate-100">
-          <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider text-[#FF6B00] flex items-center gap-2">
-            <FileText size={16} /> Job Description & Context
-          </h3>
-          <p className="text-slate-700 leading-relaxed whitespace-pre-line text-xs font-medium">{job.description}</p>
-        </div>
+        {job.description && (
+          <div className="space-y-3 pb-5 border-b border-slate-100">
+            <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider text-[#FF6B00] flex items-center gap-2">
+              <FileText size={16} /> Job Description & Context
+            </h3>
+            <p className="text-slate-700 leading-relaxed whitespace-pre-line text-xs font-medium">{job.description}</p>
+          </div>
+        )}
 
         {/* Section: Selection Process */}
         {job.selection_process && (

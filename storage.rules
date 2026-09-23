@@ -1,0 +1,15 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow public read and upload access for logos, job flyers, and PDF gazettes
+    match /uploads/{allPaths=**} {
+      allow read, write: if true;
+    }
+
+    // Fallback for all storage files
+    match /{allPaths=**} {
+      allow read, write: if true;
+    }
+  }
+}

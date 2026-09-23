@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Jobs Collection: Allow public read access to browse job listings and write access for admin management
+    match /jobs/{jobId} {
+      allow read, write: if true;
+    }
+
+    // Users & Saved Jobs Subcollections: Allow profile and bookmark management
+    match /users/{userId} {
+      allow read, write: if true;
+
+      match /saved_jobs/{jobId} {
+        allow read, write: if true;
+      }
+    }
+
+    // Notifications Collection: Allow push broadcast notifications
+    match /notifications/{notifId} {
+      allow read, write: if true;
+    }
+
+    // Fallback for all other collections
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

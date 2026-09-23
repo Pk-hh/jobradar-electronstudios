@@ -1,0 +1,21 @@
+{
+  "name": "job-and-internship-notification-platform",
+  "version": "1.0.0",
+  "description": "Production-ready Android-first Job & Internship Notification Platform with Express, SQLite, React, and Tailwind CSS",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js",
+    "build": "cd client && npm run build",
+    "test": "node server/test_api.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^4.22.1",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.4.0"
+  }
+}

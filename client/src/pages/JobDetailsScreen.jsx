@@ -19,39 +19,45 @@ export default function JobDetailsScreen() {
   const [appStatus, setAppStatus] = useState(null);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
-  const [isFooterVisible, setIsFooterVisible] = useState(true);
+  const [isAtEnd, setIsAtEnd] = useState(false);
 
   useEffect(() => {
-    let lastScrollY = window.scrollY;
     let ticking = false;
 
-    const updateScrollDir = () => {
+    const checkScrollPosition = () => {
       const currentScrollY = Math.max(0, window.scrollY);
       const scrollHeight = document.documentElement.scrollHeight;
       const clientHeight = window.innerHeight;
-      const diff = currentScrollY - lastScrollY;
 
-      if (currentScrollY <= 40 || currentScrollY + clientHeight >= scrollHeight - 40) {
-        setIsFooterVisible(true);
-      } else if (diff > 8) {
-        setIsFooterVisible(false);
-      } else if (diff < -8) {
-        setIsFooterVisible(true);
+      // Show action bar ONLY when scrolled near the end of the page (within 250px of bottom), or if content is short
+      const isShortPage = scrollHeight <= clientHeight + 100;
+      const reachedEnd = currentScrollY + clientHeight >= scrollHeight - 250;
+
+      if (isShortPage || reachedEnd) {
+        setIsAtEnd(true);
+      } else {
+        setIsAtEnd(false);
       }
-      lastScrollY = currentScrollY;
+
       ticking = false;
     };
 
     const handleScroll = () => {
       if (!ticking) {
-        window.requestAnimationFrame(updateScrollDir);
+        window.requestAnimationFrame(checkScrollPosition);
         ticking = true;
       }
     };
 
+    checkScrollPosition();
+
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    window.addEventListener('resize', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [job]);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -269,10 +275,12 @@ export default function JobDetailsScreen() {
         </div>
       </div>
 
-      {/* Floating Modern Action Pod */}
+      {/* Floating Modern Action Pod (Revealed ONLY at the end of scroll) */}
       <div
-        className={`fixed bottom-16 md:bottom-6 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:max-w-lg md:w-full z-30 transform-gpu transition-transform duration-300 ease-out will-change-transform ${
-          isFooterVisible ? 'translate-y-0' : 'translate-y-[220%] md:translate-y-0 pointer-events-none md:pointer-events-auto'
+        className={`fixed bottom-16 md:bottom-6 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:max-w-lg md:w-full z-30 transform-gpu transition-all duration-500 ease-out will-change-transform ${
+          isAtEnd
+            ? 'translate-y-0 opacity-100 pointer-events-auto shadow-2xl'
+            : 'translate-y-[250%] opacity-0 pointer-events-none'
         }`}
       >
         <div className="bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-2.5 sm:p-3 shadow-[0_12px_35px_-5px_rgba(0,0,0,0.4)] flex items-center gap-2.5 sm:gap-3">

@@ -17,14 +17,14 @@ export default function BottomNavigation() {
       const clientHeight = window.innerHeight;
       const diff = currentScrollY - lastScrollY;
 
-      // Always reveal footer near top or near bottom of page
-      if (currentScrollY <= 40 || currentScrollY + clientHeight >= scrollHeight - 40) {
+      // Always reveal footer near top (< 50px), near bottom of page (within 250px), or when scrolling up
+      if (currentScrollY <= 50 || currentScrollY + clientHeight >= scrollHeight - 250) {
         setIsVisible(true);
       } else if (diff > 8) {
-        // Scrolling down -> hide footer
+        // Scrolling down in body -> hide footer
         setIsVisible(false);
       } else if (diff < -8) {
-        // Scrolling up -> open/show footer
+        // Scrolling up -> reveal footer
         setIsVisible(true);
       }
       lastScrollY = currentScrollY;
@@ -39,7 +39,11 @@ export default function BottomNavigation() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
   }, []);
 
   const navItems = [

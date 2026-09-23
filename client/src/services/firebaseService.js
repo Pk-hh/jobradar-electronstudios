@@ -242,5 +242,120 @@ export const firebaseService = {
       console.warn('Firestore create job failed, using local API:', err);
     }
     return adminApi.createJob(jobData);
+  },
+
+  // Admin: Fetch All Admin Jobs from Firestore
+  getAdminJobs: async (params = {}) => {
+    try {
+      if (isFirebaseConfigured()) {
+        const jobsRef = collection(db, 'jobs');
+        const snapshot = await getDocs(jobsRef);
+        let jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        if (params.status && params.status !== 'All') {
+          if (params.status === 'Verified') {
+            jobs = jobs.filter(j => Boolean(j.verified));
+          } else if (params.status === 'Expired') {
+            jobs = jobs.filter(j => j.status === 'Expired' || (j.application_deadline && new Date(j.application_deadline) < new Date()));
+          } else {
+            jobs = jobs.filter(j => j.status === params.status);
+          }
+        }
+
+        if (params.search) {
+          const s = params.search.toLowerCase();
+          jobs = jobs.filter(j =>
+            (j.title && j.title.toLowerCase().includes(s)) ||
+            (j.company && j.company.toLowerCase().includes(s))
+          );
+        }
+
+        jobs.sort((a, b) => new Date(b.posted_at || 0) - new Date(a.posted_at || 0));
+        return { jobs, total: jobs.length };
+      }
+    } catch (err) {
+      console.warn('Firestore getAdminJobs failed, using local REST API:', err);
+    }
+    return adminApi.getAdminJobs(params);
+  },
+
+  // Admin: Update Job in Firestore
+  updateJobInFirestore: async (id, jobData) => {
+    try {
+      if (isFirebaseConfigured()) {
+        const jobRef = doc(db, 'jobs', id);
+        await updateDoc(jobRef, { ...jobData, updated_at: new Date().toISOString() });
+        return { message: 'Job updated in Firestore' };
+      }
+    } catch (err) {
+      console.warn('Firestore updateJob failed, using local REST API:', err);
+    }
+    return adminApi.updateJob(id, jobData);
+  },
+
+  // Admin: Delete Job from Firestore
+  deleteJobInFirestore: async (id) => {
+    try {
+      if (isFirebaseConfigured()) {
+        const jobRef = doc(db, 'jobs', id);
+        await deleteDoc(jobRef);
+        return { message: 'Job deleted from Firestore' };
+      }
+    } catch (err) {
+      console.warn('Firestore deleteJob failed, using local REST API:', err);
+    }
+    return adminApi.deleteJob(id);
+  },
+
+  // Admin: Toggle Verify Status in Firestore
+  toggleVerifyInFirestore: async (id) => {
+    try {
+      if (isFirebaseConfigured()) {
+        const jobRef = doc(db, 'jobs', id);
+        const docSnap = await getDoc(jobRef);
+        if (docSnap.exists()) {
+          const currentVerified = Boolean(docSnap.data().verified);
+          await updateDoc(jobRef, { verified: !currentVerified });
+          return { message: 'Verification status updated', verified: !currentVerified };
+        }
+      }
+    } catch (err) {
+      console.warn('Firestore toggleVerify failed, using local REST API:', err);
+    }
+    return adminApi.toggleVerify(id);
+  },
+
+  // Admin: Get Admin Dashboard Stats
+  getAdminStats: async () => {
+    try {
+      if (isFirebaseConfigured()) {
+        const jobsRef = collection(db, 'jobs');
+        const snapshot = await getDocs(jobsRef);
+        const jobs = snapshot.docs.map(doc => doc.data());
+
+        const total_jobs = jobs.length;
+        const active_jobs = jobs.filter(j => j.status === 'Published' || !j.status).length;
+        const expired_jobs = jobs.filter(j => j.status === 'Expired' || (j.application_deadline && new Date(j.application_deadline) < new Date())).length;
+        const govt_jobs = jobs.filter(j => j.category === 'Government').length;
+        const internships = jobs.filter(j => j.category === 'Internships').length;
+        const total_views = jobs.reduce((acc, j) => acc + (j.views_count || 0), 0);
+        const total_clicks = jobs.reduce((acc, j) => acc + (j.clicks_count || 0), 0);
+
+        return {
+          stats: {
+            total_jobs,
+            active_jobs,
+            expired_jobs,
+            govt_jobs,
+            internships,
+            total_views,
+            total_clicks
+          }
+        };
+      }
+    } catch (err) {
+      console.warn('Firestore getAdminStats failed, using local REST API:', err);
+    }
+    return adminApi.getStats();
   }
 };

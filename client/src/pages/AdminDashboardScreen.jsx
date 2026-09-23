@@ -66,14 +66,16 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
   const fetchAdminData = async () => {
     try {
       setLoading(true);
-      const statsRes = await adminApi.getStats();
+      const statsRes = await firebaseService.getAdminStats();
       setStats(statsRes.stats);
 
-      const jobsRes = await adminApi.getAdminJobs({ status: statusFilter, search: searchQuery });
+      const jobsRes = await firebaseService.getAdminJobs({ status: statusFilter, search: searchQuery });
       setJobs(jobsRes.jobs || []);
 
-      const reportsRes = await adminApi.getReports();
-      setReports(reportsRes.reports || []);
+      try {
+        const reportsRes = await adminApi.getReports();
+        setReports(reportsRes.reports || []);
+      } catch (e) {}
     } catch (err) {
       console.error('Fetch admin data error:', err);
     } finally {
@@ -117,7 +119,7 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
       };
 
       if (editingJob) {
-        await adminApi.updateJob(editingJob.id, payload);
+        await firebaseService.updateJobInFirestore(editingJob.id, payload);
       } else {
         await firebaseService.createJobInFirestore(payload);
       }
@@ -133,7 +135,7 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
 
   const handleToggleVerify = async (jobId) => {
     try {
-      await adminApi.toggleVerify(jobId);
+      await firebaseService.toggleVerifyInFirestore(jobId);
       fetchAdminData();
     } catch (e) {}
   };
@@ -141,7 +143,7 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
   const handleDeleteJob = async (jobId) => {
     if (!window.confirm('Delete this job notification permanently?')) return;
     try {
-      await adminApi.deleteJob(jobId);
+      await firebaseService.deleteJobInFirestore(jobId);
       fetchAdminData();
     } catch (e) {}
   };

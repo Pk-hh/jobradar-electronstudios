@@ -24,7 +24,7 @@ export default function TopAppBar({ isMobileFrame, onToggleFrame }) {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-[#0F172A] text-white w-full border-b border-slate-800 shadow-md">
+    <header className="sticky top-0 z-50 bg-[#0F172A]/95 backdrop-blur-md text-white w-full border-b border-slate-800 shadow-md">
       <div className={`${isMobileFrame ? 'px-3' : 'w-full px-4 sm:px-6 md:px-8 lg:px-12'} py-3`}>
         <div className="flex items-center justify-between gap-3">
           {/* Brand Logo */}

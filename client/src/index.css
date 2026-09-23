@@ -10,7 +10,7 @@
   }
 
   html, body {
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
     touch-action: manipulation;
     width: 100%;
     max-width: 100%;
@@ -60,7 +60,7 @@
   box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.4);
   background-color: #FFFFFF;
   position: relative;
-  overflow-x: hidden !important;
+  overflow-x: clip !important;
   touch-action: pan-y;
 }
 

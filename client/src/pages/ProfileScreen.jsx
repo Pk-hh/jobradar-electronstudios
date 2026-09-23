@@ -50,7 +50,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <div className="pb-24 space-y-6 w-full">
+    <div className="pb-28 sm:pb-32 space-y-6 w-full">
       {/* Edge-to-Edge Corporate Header */}
       <div className="bg-slate-900 border-b border-slate-800 text-white w-full px-4 sm:px-6 md:px-8 lg:px-12 py-8">
         <div className="w-full flex items-center justify-between">

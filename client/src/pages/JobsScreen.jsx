@@ -53,7 +53,7 @@ export default function JobsScreen({ isMobileFrame }) {
     : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5';
 
   return (
-    <div className="pb-24 space-y-6 w-full">
+    <div className="pb-28 sm:pb-32 space-y-6 w-full">
       {/* Edge-to-Edge Corporate Header */}
       <div className="bg-slate-900 border-b border-slate-800 text-white w-full px-4 sm:px-6 md:px-8 lg:px-12 py-8 space-y-5">
         <div className="w-full space-y-4">

@@ -113,7 +113,7 @@ export default function JobDetailsScreen() {
   });
 
   return (
-    <div className="pb-32 sm:pb-36 space-y-5 bg-slate-50 min-h-screen w-full">
+    <div className="pb-48 sm:pb-52 space-y-5 bg-slate-50 min-h-screen w-full">
       {/* Top Glass Header Bar */}
       <div className="bg-[#09090B]/95 backdrop-blur-xl text-white p-3.5 sm:p-4 sticky top-[57px] md:top-[61px] z-20 shadow-lg border-b border-white/10 flex items-center justify-between">
         <button
@@ -277,7 +277,7 @@ export default function JobDetailsScreen() {
 
       {/* Floating Modern Action Pod (Revealed ONLY at the end of scroll) */}
       <div
-        className={`fixed bottom-16 md:bottom-6 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:max-w-lg md:w-full z-30 transform-gpu transition-all duration-500 ease-out will-change-transform ${
+        className={`fixed bottom-[72px] md:bottom-6 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:max-w-lg md:w-full z-30 transform-gpu transition-all duration-500 ease-out will-change-transform ${
           isAtEnd
             ? 'translate-y-0 opacity-100 pointer-events-auto shadow-2xl'
             : 'translate-y-[250%] opacity-0 pointer-events-none'

@@ -236,32 +236,32 @@ export default function JobDetailsScreen() {
         </div>
       </div>
 
-      {/* Floating Dark Glass Sticky Action Bar */}
-      <div className="fixed bottom-[56px] md:bottom-0 left-0 right-0 z-20 bg-[#09090B]/95 backdrop-blur-2xl p-3 sm:p-3.5 shadow-2xl border-t border-white/10">
-        <div className="max-w-xl mx-auto flex items-center gap-3">
+      {/* Floating Modern Action Pod */}
+      <div className="fixed bottom-16 md:bottom-6 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:max-w-lg md:w-full z-20">
+        <div className="bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-2.5 sm:p-3 shadow-[0_12px_35px_-5px_rgba(0,0,0,0.4)] flex items-center gap-2.5 sm:gap-3">
           <button
             onClick={handleSaveToggle}
-            className={`py-3.5 px-5 rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all border ${
+            className={`px-4 sm:px-5 py-3 rounded-xl sm:rounded-2xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all duration-200 btn-tactile border ${
               isSaved
-                ? 'bg-orange-500/20 text-[#FF6B00] border-[#FF6B00]'
-                : 'bg-white/10 text-slate-200 border-white/10 hover:bg-white/20 hover:text-white'
+                ? 'bg-orange-500/15 text-[#FF6B00] border-orange-500/40 shadow-xs'
+                : 'bg-slate-800/90 text-slate-300 hover:text-white border-slate-700/70 hover:bg-slate-700/80'
             }`}
           >
-            <Bookmark size={18} fill={isSaved ? '#FF6B00' : 'none'} />
-            <span>{isSaved ? 'SAVED' : 'SAVE'}</span>
+            <Bookmark size={17} fill={isSaved ? '#FF6B00' : 'none'} className={isSaved ? 'text-[#FF6B00]' : 'text-slate-400'} />
+            <span className="tracking-wide">{isSaved ? 'SAVED' : 'SAVE'}</span>
           </button>
 
           <button
             onClick={handleApplyClick}
             disabled={isExpired}
-            className={`flex-1 py-4 rounded-2xl font-extrabold text-sm text-white shadow-xl flex items-center justify-center gap-2 transition-all scale-100 hover:scale-[1.01] active:scale-[0.98] ${
+            className={`flex-1 py-3 sm:py-3.5 px-5 rounded-xl sm:rounded-2xl font-extrabold text-xs sm:text-sm text-white flex items-center justify-center gap-2 transition-all duration-200 btn-tactile shadow-lg ${
               isExpired
-                ? 'bg-slate-800 cursor-not-allowed text-slate-500'
-                : 'bg-gradient-to-r from-[#FF6B00] via-[#FF7A00] to-[#FF8500] hover:shadow-orange-500/30'
+                ? 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed'
+                : 'bg-gradient-to-r from-[#FF6B00] via-[#FF7A00] to-[#FF8500] hover:from-[#E05E00] hover:to-[#FF6B00] shadow-orange-500/25 active:scale-[0.98]'
             }`}
           >
-            <span>{isExpired ? 'DEADLINE EXPIRED' : 'APPLY NOW'}</span>
-            {!isExpired && <ExternalLink size={16} />}
+            <span className="tracking-wider">{isExpired ? 'DEADLINE EXPIRED' : 'APPLY NOW'}</span>
+            {!isExpired && <ExternalLink size={16} className="text-white flex-shrink-0" />}
           </button>
         </div>
       </div>

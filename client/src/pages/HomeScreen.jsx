@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, SlidersHorizontal, Sparkles, ArrowRight, RefreshCw, Flame, Landmark, ShieldCheck, Zap } from 'lucide-react';
-import { jobApi } from '../services/api';
+import { firebaseService } from '../services/firebaseService';
 import { useAuth } from '../context/AuthContext';
 import JobCard from '../components/JobCard';
 import CategoryChip from '../components/CategoryChip';
@@ -39,16 +39,16 @@ export default function HomeScreen({ isMobileFrame }) {
         ...filters
       };
 
-      const res = await jobApi.getJobs(params);
+      const res = await firebaseService.getJobs(params);
       setJobs(res.jobs || []);
 
       try {
-        const recRes = await jobApi.getRecommendations();
+        const recRes = await firebaseService.getRecommendations();
         setRecommendations(recRes.recommendations || []);
       } catch (e) {}
 
       try {
-        const govtRes = await jobApi.getJobs({ category: 'Government' });
+        const govtRes = await firebaseService.getJobs({ category: 'Government' });
         setGovtHighlights((govtRes.jobs || []).slice(0, 5));
       } catch (e) {}
     } catch (err) {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, AlertTriangle, Send, Check } from 'lucide-react';
-import { jobApi } from '../services/api';
+import { firebaseService } from '../services/firebaseService';
 
 export default function ReportModal({ isOpen, onClose, jobId, jobTitle }) {
   const [reason, setReason] = useState('Outdated / Closed Job');
@@ -16,7 +16,7 @@ export default function ReportModal({ isOpen, onClose, jobId, jobTitle }) {
     try {
       setLoading(true);
       setError(null);
-      await jobApi.reportJob(jobId, reason, details);
+      await firebaseService.reportJob(jobId, reason, details);
       setSubmitted(true);
       setTimeout(() => {
         setSubmitted(false);

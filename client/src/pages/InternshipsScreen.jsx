@@ -3,7 +3,7 @@ import {
   GraduationCap, Search, SlidersHorizontal, Sparkles, Code, Cpu,
   BarChart3, Zap, Plug, Microscope, Globe, Settings, Building2, TrendingUp, DollarSign, Palette
 } from 'lucide-react';
-import { jobApi } from '../services/api';
+import { firebaseService } from '../services/firebaseService';
 import JobCard from '../components/JobCard';
 import FilterBottomSheet from '../components/FilterBottomSheet';
 import { JobCardSkeleton } from '../components/SkeletonLoader';
@@ -42,7 +42,7 @@ export default function InternshipsScreen({ isMobileFrame }) {
         search: search || undefined,
         ...filters
       };
-      const res = await jobApi.getJobs(params);
+      const res = await firebaseService.getJobs(params);
       setInternships(res.jobs || []);
     } catch (err) {
       console.error('Fetch internships error:', err);

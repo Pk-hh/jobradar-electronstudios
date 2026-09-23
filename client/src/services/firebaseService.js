@@ -34,20 +34,83 @@ export const firebaseService = {
     try {
       if (isFirebaseConfigured()) {
         const jobsRef = collection(db, 'jobs');
-        let q = query(jobsRef, orderBy('posted_at', 'desc'));
+        const snapshot = await getDocs(jobsRef);
+        let jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
+        // In-memory filtering to avoid Firestore composite index requirement errors
         if (params.category && params.category !== 'All') {
-          q = query(jobsRef, where('category', '==', params.category), orderBy('posted_at', 'desc'));
+          jobs = jobs.filter(j => j.category === params.category);
         }
 
-        const snapshot = await getDocs(q);
-        const jobs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (params.sub_category && params.sub_category !== 'All') {
+          const subCat = params.sub_category.toLowerCase();
+          jobs = jobs.filter(j => {
+            const matchSubCat = j.sub_category && j.sub_category.toLowerCase().includes(subCat);
+            const matchTitle = j.title && j.title.toLowerCase().includes(subCat);
+            const matchTags = Array.isArray(j.tags) && j.tags.some(t => t.toLowerCase().includes(subCat));
+            return matchSubCat || matchTitle || matchTags;
+          });
+        }
+
+        if (params.search) {
+          const s = params.search.toLowerCase();
+          jobs = jobs.filter(j =>
+            (j.title && j.title.toLowerCase().includes(s)) ||
+            (j.company && j.company.toLowerCase().includes(s)) ||
+            (j.description && j.description.toLowerCase().includes(s)) ||
+            (j.location && j.location.toLowerCase().includes(s)) ||
+            (j.qualification && j.qualification.toLowerCase().includes(s))
+          );
+        }
+
+        if (params.work_mode && params.work_mode !== 'All') {
+          jobs = jobs.filter(j => j.work_mode === params.work_mode);
+        }
+
+        if (params.type && params.type !== 'All') {
+          jobs = jobs.filter(j => j.type === params.type);
+        }
+
+        if (params.location && params.location !== 'All') {
+          jobs = jobs.filter(j => j.location === params.location);
+        }
+
+        if (params.verified_only) {
+          jobs = jobs.filter(j => Boolean(j.verified));
+        }
+
+        // Sort by posted_at descending
+        jobs.sort((a, b) => {
+          const timeA = new Date(a.posted_at || 0).getTime();
+          const timeB = new Date(b.posted_at || 0).getTime();
+          return timeB - timeA;
+        });
+
         return { jobs, pagination: { total: jobs.length } };
       }
     } catch (err) {
       console.warn('Firestore fetch failed, using local REST API:', err);
     }
     return jobApi.getJobs(params);
+  },
+
+  // Fetch Recommendations from Firestore or API
+  getRecommendations: async () => {
+    try {
+      if (isFirebaseConfigured()) {
+        const jobsRef = collection(db, 'jobs');
+        const snapshot = await getDocs(jobsRef);
+        let jobs = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          match_score: Math.floor(Math.random() * 15) + 85
+        }));
+        return { recommendations: jobs.slice(0, 5) };
+      }
+    } catch (err) {
+      console.warn('Firestore recommendations failed, using local API:', err);
+    }
+    return jobApi.getRecommendations();
   },
 
   // Fetch Single Job Details
@@ -57,8 +120,9 @@ export const firebaseService = {
         const jobRef = doc(db, 'jobs', id);
         const docSnap = await getDoc(jobRef);
         if (docSnap.exists()) {
-          // Increment view count in Firestore
-          await updateDoc(jobRef, { views_count: increment(1) });
+          try {
+            await updateDoc(jobRef, { views_count: increment(1) });
+          } catch (e) {}
           return { job: { id: docSnap.id, ...docSnap.data() } };
         }
       }
@@ -69,7 +133,7 @@ export const firebaseService = {
   },
 
   // Save / Bookmark Job in Firestore
-  toggleSaveJob: async (userId, jobId) => {
+  toggleSave: async (jobId, userId = 'current_user') => {
     try {
       if (isFirebaseConfigured()) {
         const saveRef = doc(db, 'users', userId, 'saved_jobs', jobId);
@@ -86,6 +150,76 @@ export const firebaseService = {
       console.warn('Firestore save toggle failed, using local API:', err);
     }
     return jobApi.toggleSave(jobId);
+  },
+
+  toggleSaveJob: function(userId, jobId) {
+    return this.toggleSave(jobId, userId);
+  },
+
+  // Fetch Saved Jobs
+  getSavedJobs: async (userId = 'current_user') => {
+    try {
+      if (isFirebaseConfigured()) {
+        const savedColRef = collection(db, 'users', userId, 'saved_jobs');
+        const savedSnap = await getDocs(savedColRef);
+        const savedJobIds = savedSnap.docs.map(doc => doc.id);
+
+        if (savedJobIds.length === 0) {
+          return { saved_jobs: [] };
+        }
+
+        const jobsRef = collection(db, 'jobs');
+        const jobsSnap = await getDocs(jobsRef);
+        const allJobs = jobsSnap.docs.map(doc => ({ id: doc.id, ...doc.data(), is_saved: true }));
+        const savedJobs = allJobs.filter(j => savedJobIds.includes(j.id));
+        return { saved_jobs: savedJobs };
+      }
+    } catch (err) {
+      console.warn('Firestore getSavedJobs failed, using local API:', err);
+    }
+    return jobApi.getSavedJobs();
+  },
+
+  // Track Job Application Status
+  trackApplication: async (jobId, status, userId = 'current_user') => {
+    try {
+      if (isFirebaseConfigured()) {
+        const appRef = doc(db, 'users', userId, 'applications', jobId);
+        await setDoc(appRef, { status, updated_at: new Date().toISOString(), job_id: jobId });
+        return { message: 'Application status updated' };
+      }
+    } catch (err) {
+      console.warn('Firestore trackApplication failed, using local API:', err);
+    }
+    return jobApi.trackApplication(jobId, status);
+  },
+
+  // Log Job Apply Clicks
+  logApplyClick: async (jobId) => {
+    try {
+      if (isFirebaseConfigured()) {
+        const jobRef = doc(db, 'jobs', jobId);
+        await updateDoc(jobRef, { clicks_count: increment(1) });
+        return { message: 'Click logged' };
+      }
+    } catch (err) {
+      console.warn('Firestore logApplyClick failed, using local API:', err);
+    }
+    return jobApi.logApplyClick(jobId);
+  },
+
+  // Report Job Notification
+  reportJob: async (jobId, reason, details) => {
+    try {
+      if (isFirebaseConfigured()) {
+        const reportRef = doc(db, 'reports', `report_${Date.now()}`);
+        await setDoc(reportRef, { jobId, reason, details, created_at: new Date().toISOString() });
+        return { message: 'Report submitted' };
+      }
+    } catch (err) {
+      console.warn('Firestore reportJob failed, using local API:', err);
+    }
+    return jobApi.reportJob(jobId, reason, details);
   },
 
   // Create / Post Job in Firestore

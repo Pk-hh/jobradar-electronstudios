@@ -4,7 +4,7 @@ import {
   Landmark, ExternalLink, Calendar, FileText, CheckCircle2, ShieldAlert,
   Award, Users, Crown, Building2, Train, Shield, MapPin, BookOpen, ArrowUpRight
 } from 'lucide-react';
-import { jobApi } from '../services/api';
+import { firebaseService } from '../services/firebaseService';
 import { JobCardSkeleton } from '../components/SkeletonLoader';
 
 export default function GovernmentJobsScreen({ isMobileFrame }) {
@@ -33,7 +33,7 @@ export default function GovernmentJobsScreen({ isMobileFrame }) {
         category: 'Government',
         sub_category: activeCategory !== 'All' ? activeCategory : undefined
       };
-      const res = await jobApi.getJobs(params);
+      const res = await firebaseService.getJobs(params);
       setGovtJobs(res.jobs || []);
     } catch (err) {
       console.error('Fetch govt jobs error:', err);

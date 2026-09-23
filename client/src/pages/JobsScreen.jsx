@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, SlidersHorizontal, Briefcase, Zap } from 'lucide-react';
-import { jobApi } from '../services/api';
+import { firebaseService } from '../services/firebaseService';
 import JobCard from '../components/JobCard';
 import FilterBottomSheet from '../components/FilterBottomSheet';
 import { JobCardSkeleton } from '../components/SkeletonLoader';
@@ -33,7 +33,7 @@ export default function JobsScreen({ isMobileFrame }) {
         sub_category: subCategory !== 'All' ? subCategory : undefined,
         ...filters
       };
-      const res = await jobApi.getJobs(params);
+      const res = await firebaseService.getJobs(params);
       setJobs(res.jobs || []);
       setTotalCount(res.pagination?.total || 0);
     } catch (err) {

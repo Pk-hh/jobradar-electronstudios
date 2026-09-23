@@ -4,7 +4,7 @@ import {
   ArrowLeft, MapPin, Briefcase, Calendar, Award, CheckCircle2, Bookmark,
   Share2, AlertTriangle, ExternalLink, Users, Building, FileText, Check, DollarSign, Sparkles, ShieldCheck
 } from 'lucide-react';
-import { jobApi } from '../services/api';
+import { firebaseService } from '../services/firebaseService';
 import { DetailSkeleton } from '../components/SkeletonLoader';
 import ShareModal from '../components/ShareModal';
 import ReportModal from '../components/ReportModal';
@@ -24,10 +24,10 @@ export default function JobDetailsScreen() {
     const fetchDetails = async () => {
       try {
         setLoading(true);
-        const res = await jobApi.getJobDetails(id);
+        const res = await firebaseService.getJobDetails(id);
         setJob(res.job);
-        setIsSaved(res.job.is_saved);
-        setAppStatus(res.job.user_application_status);
+        setIsSaved(res.job ? res.job.is_saved : false);
+        setAppStatus(res.job ? res.job.user_application_status : null);
       } catch (err) {
         console.error('Fetch job details error:', err);
       } finally {
@@ -39,14 +39,14 @@ export default function JobDetailsScreen() {
 
   const handleSaveToggle = async () => {
     try {
-      const res = await jobApi.toggleSave(id);
+      const res = await firebaseService.toggleSave(id);
       setIsSaved(res.is_saved);
     } catch (e) {}
   };
 
   const handleApplyClick = () => {
     if (!job) return;
-    jobApi.logApplyClick(job.id).catch(() => {});
+    firebaseService.logApplyClick(job.id).catch(() => {});
     window.open(job.application_url, '_blank', 'noopener,noreferrer');
   };
 

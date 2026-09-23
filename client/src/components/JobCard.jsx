@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Briefcase, Calendar, Bookmark, CheckCircle2, Flame, Award, ArrowUpRight, Sparkles, Building2 } from 'lucide-react';
-import { jobApi } from '../services/api';
+import { firebaseService } from '../services/firebaseService';
 
 export default function JobCard({ job, onSaveToggle, isSaved: initialIsSaved }) {
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ export default function JobCard({ job, onSaveToggle, isSaved: initialIsSaved }) 
     e.stopPropagation();
     try {
       setSaveLoading(true);
-      const res = await jobApi.toggleSave(job.id);
+      const res = await firebaseService.toggleSave(job.id);
       setSaved(res.is_saved);
       if (onSaveToggle) onSaveToggle(job.id, res.is_saved);
     } catch (err) {

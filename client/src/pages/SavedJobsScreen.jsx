@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bookmark, Clock, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
-import { jobApi } from '../services/api';
+import { firebaseService } from '../services/firebaseService';
 import { useAuth } from '../context/AuthContext';
 import JobCard from '../components/JobCard';
 import { JobCardSkeleton } from '../components/SkeletonLoader';
@@ -21,7 +21,7 @@ export default function SavedJobsScreen() {
     }
     try {
       setLoading(true);
-      const res = await jobApi.getSavedJobs();
+      const res = await firebaseService.getSavedJobs();
       setSavedJobs(res.saved_jobs || []);
     } catch (err) {
       console.error('Fetch saved jobs error:', err);
@@ -40,7 +40,7 @@ export default function SavedJobsScreen() {
 
   const handleTrackStatus = async (jobId, newStatus) => {
     try {
-      await jobApi.trackApplication(jobId, newStatus);
+      await firebaseService.trackApplication(jobId, newStatus);
       fetchSavedJobs();
     } catch (e) {}
   };

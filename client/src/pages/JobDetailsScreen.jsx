@@ -19,6 +19,29 @@ export default function JobDetailsScreen() {
   const [appStatus, setAppStatus] = useState(null);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [isFooterVisible, setIsFooterVisible] = useState(true);
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = window.innerHeight;
+
+      if (currentScrollY < 30 || currentScrollY + clientHeight >= scrollHeight - 30) {
+        setIsFooterVisible(true);
+      } else if (currentScrollY > lastScrollY + 5) {
+        setIsFooterVisible(false);
+      } else if (currentScrollY < lastScrollY - 5) {
+        setIsFooterVisible(true);
+      }
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -237,7 +260,11 @@ export default function JobDetailsScreen() {
       </div>
 
       {/* Floating Modern Action Pod */}
-      <div className="fixed bottom-4 sm:bottom-6 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:max-w-lg md:w-full z-30">
+      <div
+        className={`fixed bottom-16 md:bottom-6 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:max-w-lg md:w-full z-30 transition-transform duration-300 ease-in-out ${
+          isFooterVisible ? 'translate-y-0' : 'translate-y-[200%] pointer-events-none'
+        }`}
+      >
         <div className="bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-2.5 sm:p-3 shadow-[0_12px_35px_-5px_rgba(0,0,0,0.4)] flex items-center gap-2.5 sm:gap-3">
           <button
             onClick={handleSaveToggle}

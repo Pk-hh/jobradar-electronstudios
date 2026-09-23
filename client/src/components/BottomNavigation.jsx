@@ -1,10 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Briefcase, GraduationCap, Bookmark, User } from 'lucide-react';
 
 export default function BottomNavigation() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = window.innerHeight;
+
+      // Always show when near top or near very bottom of page
+      if (currentScrollY < 30 || currentScrollY + clientHeight >= scrollHeight - 30) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY + 5) {
+        // Scrolling down -> hide/close footer
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY - 5) {
+        // Scrolling up -> open/show footer
+        setIsVisible(true);
+      }
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navItems = [
     { label: 'Home', path: '/', icon: Home },
@@ -15,7 +41,11 @@ export default function BottomNavigation() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 bg-[#09090B]/95 backdrop-blur-2xl text-white border-t border-white/10 shadow-2xl">
+    <nav
+      className={`fixed bottom-0 left-0 right-0 z-30 bg-[#09090B]/95 backdrop-blur-2xl text-white border-t border-white/10 shadow-2xl transition-transform duration-300 ease-in-out ${
+        isVisible ? 'translate-y-0' : 'translate-y-full pointer-events-none'
+      }`}
+    >
       <div className="max-w-md mx-auto flex items-center justify-around py-2 px-3">
         {navItems.map((item) => {
           const Icon = item.icon;

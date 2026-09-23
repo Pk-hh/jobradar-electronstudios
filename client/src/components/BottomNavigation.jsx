@@ -9,23 +9,33 @@ export default function BottomNavigation() {
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
+    let ticking = false;
 
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+    const updateScrollDir = () => {
+      const currentScrollY = Math.max(0, window.scrollY);
       const scrollHeight = document.documentElement.scrollHeight;
       const clientHeight = window.innerHeight;
+      const diff = currentScrollY - lastScrollY;
 
-      // Always show when near top or near very bottom of page
-      if (currentScrollY < 30 || currentScrollY + clientHeight >= scrollHeight - 30) {
+      // Always reveal footer near top or near bottom of page
+      if (currentScrollY <= 40 || currentScrollY + clientHeight >= scrollHeight - 40) {
         setIsVisible(true);
-      } else if (currentScrollY > lastScrollY + 5) {
-        // Scrolling down -> hide/close footer
+      } else if (diff > 8) {
+        // Scrolling down -> hide footer
         setIsVisible(false);
-      } else if (currentScrollY < lastScrollY - 5) {
+      } else if (diff < -8) {
         // Scrolling up -> open/show footer
         setIsVisible(true);
       }
       lastScrollY = currentScrollY;
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateScrollDir);
+        ticking = true;
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -42,7 +52,7 @@ export default function BottomNavigation() {
 
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 z-30 bg-[#09090B]/95 backdrop-blur-2xl text-white border-t border-white/10 shadow-2xl transition-transform duration-300 ease-in-out ${
+      className={`fixed bottom-0 left-0 right-0 z-30 bg-[#09090B]/95 backdrop-blur-2xl text-white border-t border-white/10 shadow-2xl transform-gpu transition-transform duration-300 ease-out will-change-transform ${
         isVisible ? 'translate-y-0' : 'translate-y-full pointer-events-none'
       }`}
     >

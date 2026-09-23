@@ -23,20 +23,30 @@ export default function JobDetailsScreen() {
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
+    let ticking = false;
 
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+    const updateScrollDir = () => {
+      const currentScrollY = Math.max(0, window.scrollY);
       const scrollHeight = document.documentElement.scrollHeight;
       const clientHeight = window.innerHeight;
+      const diff = currentScrollY - lastScrollY;
 
-      if (currentScrollY < 30 || currentScrollY + clientHeight >= scrollHeight - 30) {
+      if (currentScrollY <= 40 || currentScrollY + clientHeight >= scrollHeight - 40) {
         setIsFooterVisible(true);
-      } else if (currentScrollY > lastScrollY + 5) {
+      } else if (diff > 8) {
         setIsFooterVisible(false);
-      } else if (currentScrollY < lastScrollY - 5) {
+      } else if (diff < -8) {
         setIsFooterVisible(true);
       }
       lastScrollY = currentScrollY;
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateScrollDir);
+        ticking = true;
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -261,8 +271,8 @@ export default function JobDetailsScreen() {
 
       {/* Floating Modern Action Pod */}
       <div
-        className={`fixed bottom-16 md:bottom-6 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:max-w-lg md:w-full z-30 transition-transform duration-300 ease-in-out ${
-          isFooterVisible ? 'translate-y-0' : 'translate-y-[200%] pointer-events-none'
+        className={`fixed bottom-16 md:bottom-6 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:max-w-lg md:w-full z-30 transform-gpu transition-transform duration-300 ease-out will-change-transform ${
+          isFooterVisible ? 'translate-y-0' : 'translate-y-[220%] md:translate-y-0 pointer-events-none md:pointer-events-auto'
         }`}
       >
         <div className="bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-2.5 sm:p-3 shadow-[0_12px_35px_-5px_rgba(0,0,0,0.4)] flex items-center gap-2.5 sm:gap-3">

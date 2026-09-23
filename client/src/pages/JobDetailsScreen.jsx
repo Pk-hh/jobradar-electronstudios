@@ -74,9 +74,9 @@ export default function JobDetailsScreen() {
   });
 
   return (
-    <div className="pb-28 space-y-5 bg-slate-50 min-h-screen w-full">
+    <div className="pb-36 md:pb-28 space-y-5 bg-slate-50 min-h-screen w-full">
       {/* Top Glass Header Bar */}
-      <div className="bg-[#09090B]/90 backdrop-blur-xl text-white p-4 sticky top-0 z-30 shadow-xl border-b border-white/10 flex items-center justify-between">
+      <div className="bg-[#09090B]/95 backdrop-blur-xl text-white p-3.5 sm:p-4 sticky top-[57px] md:top-[61px] z-20 shadow-lg border-b border-white/10 flex items-center justify-between">
         <button
           onClick={() => navigate(-1)}
           className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition-all"
@@ -237,7 +237,7 @@ export default function JobDetailsScreen() {
       </div>
 
       {/* Floating Dark Glass Sticky Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#09090B]/95 backdrop-blur-2xl p-3.5 shadow-2xl border-t border-white/10">
+      <div className="fixed bottom-[56px] md:bottom-0 left-0 right-0 z-20 bg-[#09090B]/95 backdrop-blur-2xl p-3 sm:p-3.5 shadow-2xl border-t border-white/10">
         <div className="max-w-xl mx-auto flex items-center gap-3">
           <button
             onClick={handleSaveToggle}

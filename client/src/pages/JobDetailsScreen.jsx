@@ -74,7 +74,7 @@ export default function JobDetailsScreen() {
   });
 
   return (
-    <div className="pb-36 md:pb-28 space-y-5 bg-slate-50 min-h-screen w-full">
+    <div className="pb-32 sm:pb-36 space-y-5 bg-slate-50 min-h-screen w-full">
       {/* Top Glass Header Bar */}
       <div className="bg-[#09090B]/95 backdrop-blur-xl text-white p-3.5 sm:p-4 sticky top-[57px] md:top-[61px] z-20 shadow-lg border-b border-white/10 flex items-center justify-between">
         <button
@@ -237,7 +237,7 @@ export default function JobDetailsScreen() {
       </div>
 
       {/* Floating Modern Action Pod */}
-      <div className="fixed bottom-16 md:bottom-6 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:max-w-lg md:w-full z-20">
+      <div className="fixed bottom-4 sm:bottom-6 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:max-w-lg md:w-full z-30">
         <div className="bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-2.5 sm:p-3 shadow-[0_12px_35px_-5px_rgba(0,0,0,0.4)] flex items-center gap-2.5 sm:gap-3">
           <button
             onClick={handleSaveToggle}

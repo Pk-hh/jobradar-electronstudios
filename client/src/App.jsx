@@ -19,6 +19,9 @@ function MainLayout() {
   // Default to PC Desktop Wide View (100% Screen Width)
   const [isMobileFrame, setIsMobileFrame] = useState(false);
 
+  // Hide BottomNavigation on Job Details screen so Save & Apply bar has clean dedicated bottom space without footer collisions
+  const isJobDetailsPage = location.pathname.startsWith('/jobs/') && location.pathname !== '/jobs';
+
   return (
     <div className={`min-h-screen bg-slate-50 transition-all duration-300 ${isMobileFrame ? 'py-0 sm:py-6 bg-slate-950' : ''}`}>
       <div
@@ -49,8 +52,8 @@ function MainLayout() {
           </div>
         </main>
 
-        {/* Bottom navigation for mobile viewports */}
-        {(isMobileFrame || true) && (
+        {/* Bottom navigation for main tab screens (hidden on detail pages to prevent double footer merging) */}
+        {!isJobDetailsPage && (
           <div className={!isMobileFrame ? 'block md:hidden' : 'block'}>
             <BottomNavigation />
           </div>

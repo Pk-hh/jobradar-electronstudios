@@ -132,7 +132,7 @@ export default function GovernmentJobsScreen({ isMobileFrame }) {
                   </div>
 
                   {/* Vacancy & Pay Matrix Summary */}
-                  <div className="grid grid-cols-2 gap-2.5 bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/60 text-xs font-medium">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/60 text-xs font-medium">
                     <div>
                       <span className="text-[10px] text-slate-500 block font-bold uppercase">Total Vacancies</span>
                       <span className="font-extrabold text-slate-900 flex items-center gap-1 text-xs mt-0.5">
@@ -147,18 +147,18 @@ export default function GovernmentJobsScreen({ isMobileFrame }) {
 
                   {/* Dates & Qualification */}
                   <div className="text-xs text-slate-700 space-y-1.5 font-medium">
-                    <p><span className="font-bold text-slate-900">Qualification:</span> {job.qualification}</p>
-                    <p><span className="font-bold text-slate-900">Eligibility / Age:</span> {job.experience || job.eligibility}</p>
+                    {job.qualification && <p><span className="font-bold text-slate-900">Qualification:</span> {job.qualification}</p>}
+                    {(job.experience || job.eligibility) && <p><span className="font-bold text-slate-900">Eligibility / Age:</span> {job.experience || job.eligibility}</p>}
                   </div>
                 </div>
 
                 {/* Action Buttons for Official PDF & Official Portal */}
-                <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs gap-2 mt-2">
-                  <span className="text-[11px] text-slate-500 flex items-center gap-1 font-semibold">
-                    <Calendar size={13} className="text-[#FF6B00]" /> Deadline: {new Date(job.application_deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-3 border-t border-slate-100 text-xs gap-2.5 mt-2">
+                  <span className="text-[11px] text-slate-500 flex items-center gap-1 font-semibold whitespace-nowrap">
+                    <Calendar size={13} className="text-[#FF6B00]" /> Deadline: {job.application_deadline ? new Date(job.application_deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Open'}
                   </span>
 
-                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
                     {job.official_notification_url && (
                       <a
                         href={job.official_notification_url}

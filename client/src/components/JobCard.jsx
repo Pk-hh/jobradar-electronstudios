@@ -130,7 +130,7 @@ export default function JobCard({ job, onSaveToggle, isSaved: initialIsSaved }) 
             {isInternship ? 'Stipend' : 'Compensation'}
           </span>
           <span className="font-extrabold text-[#FF6B00] text-xs sm:text-sm tracking-tight block truncate">
-            {job.salary || job.stipend || 'Not Specified'}
+            {job.salary || job.stipend || 'As per norms'}
           </span>
         </div>
 

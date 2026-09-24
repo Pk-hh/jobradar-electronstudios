@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ShieldCheck, PlusCircle, Bell, RefreshCw, Eye, MousePointerClick, CheckCircle2,
-  AlertTriangle, Trash2, Edit3, Search, Filter, Calendar, ExternalLink, Upload, FolderCheck, FileText, Image, Building, CloudUpload, MapPin
+  AlertTriangle, Trash2, Edit3, Search, Filter, Calendar, ExternalLink, Upload, FolderCheck, FileText, Image, Building, CloudUpload, MapPin, Table
 } from 'lucide-react';
 import { adminApi } from '../services/api';
 import { firebaseService, isFirebaseConfigured } from '../services/firebaseService';
@@ -24,6 +24,14 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
   const [editingJob, setEditingJob] = useState(null);
   const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  const defaultCustomTable = {
+    title: '',
+    headers: ['Post / Subject', 'Eligibility / Syllabus', 'Vacancies / Marks', 'Pay Scale / Notes'],
+    rows: [
+      ['', '', '', '']
+    ]
+  };
 
   // Empty Form State for manual entry
   const emptyFormState = {
@@ -50,7 +58,8 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
     application_url: '',
     source: '',
     status: 'Published',
-    verified: true
+    verified: true,
+    custom_table: defaultCustomTable
   };
 
   // Form State
@@ -111,9 +120,23 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
         ? formData.skills.split(',').map(s => s.trim()).filter(Boolean)
         : formData.skills;
 
+      // Clean custom_table payload so only non-empty rows/headers are saved
+      let cleanedTable = null;
+      if (formData.custom_table && formData.custom_table.rows && formData.custom_table.rows.length > 0) {
+        const activeRows = formData.custom_table.rows.filter(row => row && row.some(cell => cell && String(cell).trim() !== ''));
+        if (activeRows.length > 0) {
+          cleanedTable = {
+            title: formData.custom_table.title || 'Syllabus & Post Breakdown',
+            headers: (formData.custom_table.headers || []).map(h => h || ''),
+            rows: activeRows
+          };
+        }
+      }
+
       const payload = {
         ...formData,
         skills: skillsArray,
+        custom_table: cleanedTable,
         status: statusOverride || formData.status,
         vacancies: formData.vacancies ? parseInt(formData.vacancies) : 0
       };
@@ -351,7 +374,8 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
                         setFormData({
                           ...emptyFormState,
                           ...job,
-                          skills: Array.isArray(job.skills) ? job.skills.join(', ') : job.skills || ''
+                          skills: Array.isArray(job.skills) ? job.skills.join(', ') : job.skills || '',
+                          custom_table: job.custom_table || defaultCustomTable
                         });
                         setIsJobModalOpen(true);
                       }}
@@ -678,6 +702,228 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
                   placeholder="e.g. 1. Online Test  2. Technical Interview  3. HR Round"
                   className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
                 />
+              </div>
+
+              {/* Custom Detail Table Builder Section */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/90 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="font-extrabold text-slate-900 flex items-center gap-1.5 text-xs">
+                    <Table size={16} className="text-[#FF6B00]" /> Custom Detail Table (Syllabus, Posts, Pay Scale, Exam Pattern)
+                  </label>
+                  <span className="text-[10px] text-slate-500 font-medium">Optional</span>
+                </div>
+
+                {/* Table Title Input */}
+                <div>
+                  <label className="text-[11px] font-bold text-slate-700 block mb-1">Table Section Title</label>
+                  <input
+                    type="text"
+                    value={formData.custom_table?.title || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormData(prev => ({
+                        ...prev,
+                        custom_table: { ...(prev.custom_table || defaultCustomTable), title: val }
+                      }));
+                    }}
+                    placeholder="e.g. Syllabus Breakdown / Category-wise Vacancies & Pay Scale"
+                    className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF6B00]"
+                  />
+                </div>
+
+                {/* Quick Template Presets */}
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 block mb-1">Quick Table Presets:</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({
+                        ...prev,
+                        custom_table: {
+                          title: 'Syllabus & Exam Pattern',
+                          headers: ['Subject / Module', 'Topics Covered', 'Total Marks', 'Duration'],
+                          rows: [
+                            ['General Knowledge', 'Current Affairs, Indian History, Polity', '50 Marks', '60 Mins'],
+                            ['Technical Core', 'Data Structures, OS, DBMS, Networks', '100 Marks', '120 Mins']
+                          ]
+                        }
+                      }))}
+                      className="px-2.5 py-1 bg-white hover:bg-orange-50 border border-slate-200 hover:border-orange-300 text-[10px] font-extrabold text-slate-700 rounded-lg transition-all"
+                    >
+                      + Syllabus Template
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({
+                        ...prev,
+                        custom_table: {
+                          title: 'Post & Category Vacancies Matrix',
+                          headers: ['Post Name', 'Qualification', 'Vacancies', 'Pay Scale / Salary'],
+                          rows: [
+                            ['Assistant Manager', 'B.Tech / MBA', '25', 'Rs. 45,000 - 85,000'],
+                            ['Junior Engineer', 'Diploma / B.E', '50', 'Rs. 35,000 - 65,000']
+                          ]
+                        }
+                      }))}
+                      className="px-2.5 py-1 bg-white hover:bg-orange-50 border border-slate-200 hover:border-orange-300 text-[10px] font-extrabold text-slate-700 rounded-lg transition-all"
+                    >
+                      + Vacancies & Pay Template
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({
+                        ...prev,
+                        custom_table: {
+                          title: 'Selection Rounds & Weightage',
+                          headers: ['Stage', 'Round Name', 'Mode', 'Qualifying Marks'],
+                          rows: [
+                            ['Stage 1', 'Online MCQ Screening', 'Computer Based (CBT)', '40%'],
+                            ['Stage 2', 'Technical Interview', 'In-Person / Video', '50%']
+                          ]
+                        }
+                      }))}
+                      className="px-2.5 py-1 bg-white hover:bg-orange-50 border border-slate-200 hover:border-orange-300 text-[10px] font-extrabold text-slate-700 rounded-lg transition-all"
+                    >
+                      + Selection Rounds Template
+                    </button>
+                  </div>
+                </div>
+
+                {/* Headers Config */}
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-extrabold text-slate-800">Column Headers ({formData.custom_table?.headers?.length || 0})</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const curHeaders = formData.custom_table?.headers || [];
+                        const curRows = formData.custom_table?.rows || [[]];
+                        const newHeaders = [...curHeaders, `Column ${curHeaders.length + 1}`];
+                        const newRows = curRows.map(row => [...row, '']);
+                        setFormData(prev => ({
+                          ...prev,
+                          custom_table: { ...(prev.custom_table || defaultCustomTable), headers: newHeaders, rows: newRows }
+                        }));
+                      }}
+                      className="text-[10px] font-bold text-[#FF6B00] hover:underline"
+                    >
+                      + Add Column
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {formData.custom_table?.headers?.map((h, hIdx) => (
+                      <div key={hIdx} className="flex items-center gap-1">
+                        <input
+                          type="text"
+                          value={h}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const newHeaders = [...(formData.custom_table?.headers || [])];
+                            newHeaders[hIdx] = val;
+                            setFormData(prev => ({
+                              ...prev,
+                              custom_table: { ...prev.custom_table, headers: newHeaders }
+                            }));
+                          }}
+                          placeholder={`Header ${hIdx + 1}`}
+                          className="w-full p-2 bg-white border border-slate-300 rounded-lg text-xs font-bold focus:outline-none focus:border-[#FF6B00]"
+                        />
+                        {formData.custom_table?.headers?.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newHeaders = formData.custom_table.headers.filter((_, idx) => idx !== hIdx);
+                              const newRows = formData.custom_table.rows.map(row => row.filter((_, idx) => idx !== hIdx));
+                              setFormData(prev => ({
+                                ...prev,
+                                custom_table: { ...prev.custom_table, headers: newHeaders, rows: newRows }
+                              }));
+                            }}
+                            className="text-slate-400 hover:text-rose-600 p-1 font-bold text-xs"
+                            title="Remove column"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Rows Config */}
+                <div className="space-y-2 pt-2 border-t border-slate-200">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-extrabold text-slate-800">Table Data Rows ({formData.custom_table?.rows?.length || 0})</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const colCount = formData.custom_table?.headers?.length || 4;
+                        const newRow = new Array(colCount).fill('');
+                        setFormData(prev => ({
+                          ...prev,
+                          custom_table: {
+                            ...(prev.custom_table || defaultCustomTable),
+                            rows: [...(prev.custom_table?.rows || []), newRow]
+                          }
+                        }));
+                      }}
+                      className="text-[10px] font-bold text-[#FF6B00] hover:underline"
+                    >
+                      + Add Row
+                    </button>
+                  </div>
+
+                  <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    {formData.custom_table?.rows?.map((row, rIdx) => (
+                      <div key={rIdx} className="bg-white p-2 rounded-xl border border-slate-200 space-y-1.5 relative group">
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 font-bold border-b border-slate-100 pb-1">
+                          <span>Row #{rIdx + 1}</span>
+                          {formData.custom_table.rows.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newRows = formData.custom_table.rows.filter((_, idx) => idx !== rIdx);
+                                setFormData(prev => ({
+                                  ...prev,
+                                  custom_table: { ...prev.custom_table, rows: newRows }
+                                }));
+                              }}
+                              className="text-rose-600 font-extrabold text-[10px] hover:underline"
+                            >
+                              Delete Row
+                            </button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5">
+                          {formData.custom_table?.headers?.map((_, cIdx) => (
+                            <input
+                              key={cIdx}
+                              type="text"
+                              value={row[cIdx] || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                const newRows = formData.custom_table.rows.map((r, idx) => {
+                                  if (idx !== rIdx) return r;
+                                  const updatedRow = [...r];
+                                  updatedRow[cIdx] = val;
+                                  return updatedRow;
+                                });
+                                setFormData(prev => ({
+                                  ...prev,
+                                  custom_table: { ...prev.custom_table, rows: newRows }
+                                }));
+                              }}
+                              placeholder={formData.custom_table.headers[cIdx] || `Col ${cIdx + 1}`}
+                              className="w-full p-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:border-[#FF6B00] focus:bg-white"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 

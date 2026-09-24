@@ -13,6 +13,7 @@ import SavedJobsScreen from './pages/SavedJobsScreen';
 import ProfileScreen from './pages/ProfileScreen';
 import NotificationsScreen from './pages/NotificationsScreen';
 import AdminDashboardScreen from './pages/AdminDashboardScreen';
+import AdminJobEditorScreen from './pages/AdminJobEditorScreen';
 
 function MainLayout() {
   const location = useLocation();
@@ -45,6 +46,8 @@ function MainLayout() {
               <Route path="/profile" element={<ProfileScreen isMobileFrame={isMobileFrame} />} />
               <Route path="/notifications" element={<NotificationsScreen isMobileFrame={isMobileFrame} />} />
               <Route path="/admin" element={<AdminDashboardScreen isMobileFrame={isMobileFrame} />} />
+              <Route path="/admin/jobs/new" element={<AdminJobEditorScreen isMobileFrame={isMobileFrame} />} />
+              <Route path="/admin/jobs/edit/:id" element={<AdminJobEditorScreen isMobileFrame={isMobileFrame} />} />
             </Routes>
           </div>
         </main>

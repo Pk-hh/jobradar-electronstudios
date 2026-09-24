@@ -139,15 +139,24 @@ export default function JobDetailsScreen() {
   const showDescription = Boolean(job.description?.trim());
   const showSelectionProcess = Boolean(job.selection_process?.trim());
 
-  // Check custom table
-  const customTable = job.custom_table;
-  const showCustomTable = Boolean(
-    customTable &&
-    Array.isArray(customTable.headers) &&
-    customTable.headers.some(h => typeof h === 'string' && h.trim() !== '') &&
-    Array.isArray(customTable.rows) &&
-    customTable.rows.some(r => Array.isArray(r) && r.some(c => typeof c === 'string' && c.trim() !== ''))
-  );
+  // Check multiple custom tables (or fallback single custom_table)
+  let displayTables = [];
+  if (Array.isArray(job.custom_tables) && job.custom_tables.length > 0) {
+    displayTables = job.custom_tables;
+  } else if (job.custom_table) {
+    displayTables = [job.custom_table];
+  }
+
+  const validTables = displayTables.filter(tbl => {
+    return (
+      tbl &&
+      Array.isArray(tbl.headers) &&
+      tbl.headers.some(h => typeof h === 'string' && h.trim() !== '') &&
+      Array.isArray(tbl.rows) &&
+      tbl.rows.some(r => Array.isArray(r) && r.some(c => typeof c === 'string' && c.trim() !== ''))
+    );
+  });
+  const showCustomTables = validTables.length > 0;
 
   // Check verification section
   const hasSource = Boolean(job.source?.trim());
@@ -261,7 +270,7 @@ export default function JobDetailsScreen() {
       )}
 
       {/* Structured Details Sections */}
-      {(showEligibilitySection || showSkillsSection || showDescription || showSelectionProcess || showCustomTable || showVerificationSection) && (
+      {(showEligibilitySection || showSkillsSection || showDescription || showSelectionProcess || showCustomTables || showVerificationSection) && (
         <div className="mx-4 sm:mx-6 md:mx-8 lg:mx-12 bg-white rounded-3xl p-6 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.06)] border border-slate-200/90 space-y-6 text-xs text-slate-800">
           {/* Section: Qualification & Eligibility */}
           {showEligibilitySection && (
@@ -278,17 +287,17 @@ export default function JobDetailsScreen() {
             </div>
           )}
 
-          {/* Section: Custom Detail Table (Syllabus, Vacancies Breakdown, Exam Pattern, Pay Scale, etc.) */}
-          {showCustomTable && (
-            <div className="space-y-3 pb-5 border-b border-slate-100">
+          {/* Section: Multiple Custom Detail Tables (Syllabus, Vacancies Breakdown, Exam Pattern, Pay Scale, etc.) */}
+          {validTables.map((table, tIdx) => (
+            <div key={table.id || tIdx} className="space-y-3 pb-5 border-b border-slate-100">
               <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider text-[#FF6B00] flex items-center gap-2">
-                <Table size={16} /> {customTable.title || 'Syllabus & Detail Matrix'}
+                <Table size={16} /> {table.title || `Notification Table Details #${tIdx + 1}`}
               </h3>
               <div className="overflow-x-auto rounded-2xl border border-slate-200/90 shadow-2xs">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-slate-900 text-white">
-                      {customTable.headers.map((h, idx) => (
+                      {table.headers.map((h, idx) => (
                         <th key={idx} className="p-3 font-extrabold uppercase tracking-wider text-[11px] whitespace-nowrap border-b border-slate-800">
                           {h}
                         </th>
@@ -296,7 +305,7 @@ export default function JobDetailsScreen() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {customTable.rows.map((row, rIdx) => {
+                    {table.rows.map((row, rIdx) => {
                       if (!Array.isArray(row) || row.every(c => !c || String(c).trim() === '')) return null;
                       return (
                         <tr key={rIdx} className="odd:bg-slate-50/60 even:bg-white hover:bg-orange-50/30 transition-colors">
@@ -312,7 +321,7 @@ export default function JobDetailsScreen() {
                 </table>
               </div>
             </div>
-          )}
+          ))}
 
           {/* Section: Required Skills */}
           {showSkillsSection && (

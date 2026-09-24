@@ -60,7 +60,11 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
     source: '',
     status: 'Published',
     verified: true,
-    custom_tables: [createDefaultTable(1)]
+    custom_tables: [createDefaultTable(1)],
+    custom_fields: [
+      { label: 'Age Limit', value: '' },
+      { label: 'Application Fee', value: '' }
+    ]
   };
 
   // Form State
@@ -142,11 +146,20 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
           .filter(Boolean);
       }
 
+      // Clean custom_fields payload
+      let cleanedFields = [];
+      if (Array.isArray(formData.custom_fields)) {
+        cleanedFields = formData.custom_fields
+          .filter(f => f && f.label && String(f.label).trim() !== '' && f.value && String(f.value).trim() !== '')
+          .map(f => ({ label: String(f.label).trim(), value: String(f.value).trim() }));
+      }
+
       const payload = {
         ...formData,
         skills: skillsArray,
         custom_tables: cleanedTables,
         custom_table: cleanedTables.length > 0 ? cleanedTables[0] : null,
+        custom_fields: cleanedFields,
         status: statusOverride || formData.status,
         vacancies: formData.vacancies ? parseInt(formData.vacancies) : 0
       };
@@ -394,7 +407,13 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
                           ...emptyFormState,
                           ...job,
                           skills: Array.isArray(job.skills) ? job.skills.join(', ') : job.skills || '',
-                          custom_tables: initialTables
+                          custom_tables: initialTables,
+                          custom_fields: Array.isArray(job.custom_fields) && job.custom_fields.length > 0
+                            ? job.custom_fields
+                            : [
+                                { label: 'Age Limit', value: '' },
+                                { label: 'Application Fee', value: '' }
+                              ]
                         });
                         setIsJobModalOpen(true);
                       }}
@@ -721,6 +740,96 @@ export default function AdminDashboardScreen({ isMobileFrame }) {
                   placeholder="e.g. 1. Online Test  2. Technical Interview  3. HR Round"
                   className="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-xl text-xs"
                 />
+              </div>
+
+              {/* Custom Extra Key-Value Fields & Columns Builder */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/90 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="font-extrabold text-slate-900 flex items-center gap-1.5 text-xs">
+                      <Sparkles size={16} className="text-[#FF6B00]" /> Custom Key-Value Columns ({formData.custom_fields?.length || 0})
+                    </label>
+                    <span className="text-[10px] text-slate-500 font-medium block">Add custom specification fields like Age Limit, Application Fee, Bond, Exam Venue, etc.</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const curFields = formData.custom_fields || [];
+                      setFormData(prev => ({
+                        ...prev,
+                        custom_fields: [...curFields, { label: '', value: '' }]
+                      }));
+                    }}
+                    className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-extrabold rounded-lg shadow-xs transition-all flex-shrink-0"
+                  >
+                    + Add Field
+                  </button>
+                </div>
+
+                {/* Quick Field Presets */}
+                <div className="flex flex-wrap gap-1.5">
+                  {['Age Limit', 'Application Fee', 'Service Bond', 'Exam Date / Venue', 'Cutoff Marks'].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => {
+                        const curFields = formData.custom_fields || [];
+                        if (!curFields.some(f => f.label === preset)) {
+                          setFormData(prev => ({
+                            ...prev,
+                            custom_fields: [...curFields, { label: preset, value: '' }]
+                          }));
+                        }
+                      }}
+                      className="px-2 py-0.5 bg-white hover:bg-orange-50 border border-slate-200 text-[10px] font-bold text-slate-700 rounded-md transition-all"
+                    >
+                      + {preset}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Fields Inputs */}
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {formData.custom_fields?.map((field, fIdx) => (
+                    <div key={fIdx} className="flex items-center gap-2 bg-white p-2 rounded-xl border border-slate-200">
+                      <input
+                        type="text"
+                        value={field.label || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const newFields = [...(formData.custom_fields || [])];
+                          newFields[fIdx] = { ...newFields[fIdx], label: val };
+                          setFormData(prev => ({ ...prev, custom_fields: newFields }));
+                        }}
+                        placeholder="Field Label (e.g. Age Limit)"
+                        className="w-1/3 p-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-extrabold focus:outline-none focus:border-[#FF6B00] focus:bg-white"
+                      />
+                      <input
+                        type="text"
+                        value={field.value || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const newFields = [...(formData.custom_fields || [])];
+                          newFields[fIdx] = { ...newFields[fIdx], value: val };
+                          setFormData(prev => ({ ...prev, custom_fields: newFields }));
+                        }}
+                        placeholder="Field Value (e.g. 18 to 30 Years)"
+                        className="flex-1 p-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:border-[#FF6B00] focus:bg-white"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newFields = formData.custom_fields.filter((_, idx) => idx !== fIdx);
+                          setFormData(prev => ({ ...prev, custom_fields: newFields }));
+                        }}
+                        className="text-slate-400 hover:text-rose-600 p-1 font-bold text-sm"
+                        title="Remove field"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Multiple Custom Data Tables Builder Section */}

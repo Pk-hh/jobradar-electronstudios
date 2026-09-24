@@ -139,6 +139,12 @@ export default function JobDetailsScreen() {
   const showDescription = Boolean(job.description?.trim());
   const showSelectionProcess = Boolean(job.selection_process?.trim());
 
+  // Check custom key-value fields (columns)
+  const validCustomFields = Array.isArray(job.custom_fields)
+    ? job.custom_fields.filter(f => f && f.label && String(f.label).trim() !== '' && f.value && String(f.value).trim() !== '')
+    : [];
+  const showCustomFields = validCustomFields.length > 0;
+
   // Check multiple custom tables (or fallback single custom_table)
   let displayTables = [];
   if (Array.isArray(job.custom_tables) && job.custom_tables.length > 0) {
@@ -270,7 +276,7 @@ export default function JobDetailsScreen() {
       )}
 
       {/* Structured Details Sections */}
-      {(showEligibilitySection || showSkillsSection || showDescription || showSelectionProcess || showCustomTables || showVerificationSection) && (
+      {(showEligibilitySection || showSkillsSection || showDescription || showSelectionProcess || showCustomFields || showCustomTables || showVerificationSection) && (
         <div className="mx-4 sm:mx-6 md:mx-8 lg:mx-12 bg-white rounded-3xl p-6 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.06)] border border-slate-200/90 space-y-6 text-xs text-slate-800">
           {/* Section: Qualification & Eligibility */}
           {showEligibilitySection && (
@@ -283,6 +289,23 @@ export default function JobDetailsScreen() {
                 {hasBranch && <p><span className="font-bold text-slate-900">Branch / Stream:</span> {job.branch}</p>}
                 {hasEligibility && <p><span className="font-bold text-slate-900">Detailed Criteria:</span> {job.eligibility}</p>}
                 {hasVacancies && <p><span className="font-bold text-slate-900">Open Vacancies:</span> {job.vacancies} Posts</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Section: Custom Extra Key-Value Fields / Specifications (Age Limit, Application Fee, Bond, etc.) */}
+          {showCustomFields && (
+            <div className="space-y-3 pb-5 border-b border-slate-100">
+              <h3 className="font-black text-slate-900 text-sm uppercase tracking-wider text-[#FF6B00] flex items-center gap-2">
+                <Sparkles size={16} /> Additional Specifications & Details
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {validCustomFields.map((f, idx) => (
+                  <div key={idx} className="bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/80 space-y-1">
+                    <span className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider block">{f.label}</span>
+                    <span className="font-bold text-slate-800 text-xs block leading-relaxed whitespace-pre-line">{f.value}</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}

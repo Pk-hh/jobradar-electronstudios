@@ -284,6 +284,7 @@ export default function AdminJobEditorScreen({ isMobileFrame }) {
                 <option value="Jobs">Private / Tech Jobs</option>
                 <option value="Internships">Internships & Apprenticeships</option>
                 <option value="Government">Government & PSU Recruitment</option>
+                <option value="Entrance Exams">Entrance Exams & Admission Tests</option>
               </select>
             </div>
 
@@ -293,13 +294,13 @@ export default function AdminJobEditorScreen({ isMobileFrame }) {
                 type="text"
                 value={formData.sub_category}
                 onChange={(e) => setFormData({ ...formData, sub_category: e.target.value })}
-                placeholder="e.g. Software, Mechanical, Peon & Chowkidar"
+                placeholder="e.g. Software, Mechanical, Engineering, Medical"
                 className="w-full p-3 bg-slate-50 border border-slate-300/80 rounded-2xl font-semibold text-slate-900 focus:outline-none focus:border-[#FF6B00]"
               />
             </div>
 
             <div>
-              <label className="font-extrabold text-slate-900 block mb-1">Job Type</label>
+              <label className="font-extrabold text-slate-900 block mb-1">Job / Notice Type</label>
               <select
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value })}
@@ -309,6 +310,7 @@ export default function AdminJobEditorScreen({ isMobileFrame }) {
                 <option value="Part Time">Part Time</option>
                 <option value="Internship">Internship</option>
                 <option value="Contractual">Contractual / Govt Gazette</option>
+                <option value="Entrance Exam">Entrance Exam / Admission Test</option>
               </select>
             </div>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Flame, Briefcase, GraduationCap, Landmark, Building2,
+  Flame, Briefcase, GraduationCap, Landmark, BookOpen, Building2,
   Zap, Home, Footprints, Wrench, School
 } from 'lucide-react';
 
@@ -9,6 +9,7 @@ const CATEGORIES = [
   { id: 'Jobs', label: 'Jobs', icon: Briefcase },
   { id: 'Internships', label: 'Internships', icon: GraduationCap },
   { id: 'Government', label: 'Govt Jobs', icon: Landmark },
+  { id: 'Entrance Exams', label: 'Entrance Exams', icon: BookOpen },
   { id: 'Private', label: 'Private Jobs', icon: Building2 },
   { id: 'Freshers', label: 'Freshers', icon: Zap },
   { id: 'Work From Home', label: 'Work From Home', icon: Home },

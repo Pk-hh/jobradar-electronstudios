@@ -8,6 +8,7 @@ import HomeScreen from './pages/HomeScreen';
 import JobsScreen from './pages/JobsScreen';
 import InternshipsScreen from './pages/InternshipsScreen';
 import GovernmentJobsScreen from './pages/GovernmentJobsScreen';
+import EntranceExamsScreen from './pages/EntranceExamsScreen';
 import JobDetailsScreen from './pages/JobDetailsScreen';
 import SavedJobsScreen from './pages/SavedJobsScreen';
 import ProfileScreen from './pages/ProfileScreen';
@@ -41,6 +42,7 @@ function MainLayout() {
               <Route path="/jobs" element={<JobsScreen isMobileFrame={isMobileFrame} />} />
               <Route path="/internships" element={<InternshipsScreen isMobileFrame={isMobileFrame} />} />
               <Route path="/government" element={<GovernmentJobsScreen isMobileFrame={isMobileFrame} />} />
+              <Route path="/entrance-exams" element={<EntranceExamsScreen isMobileFrame={isMobileFrame} />} />
               <Route path="/jobs/:id" element={<JobDetailsScreen isMobileFrame={isMobileFrame} />} />
               <Route path="/saved" element={<SavedJobsScreen isMobileFrame={isMobileFrame} />} />
               <Route path="/profile" element={<ProfileScreen isMobileFrame={isMobileFrame} />} />

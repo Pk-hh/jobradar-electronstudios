@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Bell, Smartphone, Monitor, ShieldCheck, Home, Briefcase, GraduationCap, Landmark, Bookmark, User, Compass } from 'lucide-react';
+import { Search, Bell, Smartphone, Monitor, ShieldCheck, Home, Briefcase, GraduationCap, Landmark, BookOpen, Bookmark, User, Compass } from 'lucide-react';
 import { notificationApi } from '../services/api';
 
 export default function TopAppBar({ isMobileFrame, onToggleFrame }) {
@@ -19,6 +19,7 @@ export default function TopAppBar({ isMobileFrame, onToggleFrame }) {
     { label: 'Jobs', path: '/jobs', icon: Briefcase },
     { label: 'Internships', path: '/internships', icon: GraduationCap },
     { label: 'Govt Jobs', path: '/government', icon: Landmark },
+    { label: 'Entrance Exams', path: '/entrance-exams', icon: BookOpen },
     { label: 'Saved', path: '/saved', icon: Bookmark },
     { label: 'Profile', path: '/profile', icon: User }
   ];

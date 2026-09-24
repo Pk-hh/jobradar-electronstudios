@@ -75,11 +75,17 @@ export default function AdminJobEditorScreen({ isMobileFrame }) {
               initialTables = [createDefaultTable(1)];
             }
 
+            const normalizedTables = initialTables.map(tbl => ({
+              ...tbl,
+              headers: tbl.headers || [],
+              rows: (tbl.rows || []).map(r => Array.isArray(r) ? r : (r?.cells || []))
+            }));
+
             setFormData({
               ...emptyFormState,
               ...job,
               skills: Array.isArray(job.skills) ? job.skills.join(', ') : job.skills || '',
-              custom_tables: initialTables,
+              custom_tables: normalizedTables,
               custom_fields: Array.isArray(job.custom_fields) && job.custom_fields.length > 0
                 ? job.custom_fields
                 : [
@@ -130,26 +136,30 @@ export default function AdminJobEditorScreen({ isMobileFrame }) {
         ? formData.skills.split(',').map(s => s.trim()).filter(Boolean)
         : formData.skills;
 
-      // Clean custom_tables payload so all valid non-empty tables and rows are preserved
+      // Clean custom_tables payload and structure rows as Firestore-compliant objects ({ cells: [...] })
       let cleanedTables = [];
       if (Array.isArray(formData.custom_tables)) {
         cleanedTables = formData.custom_tables
           .map((tbl, idx) => {
             if (!tbl) return null;
             const headers = (tbl.headers || []).map(h => h !== undefined && h !== null ? String(h) : '');
-            const rows = (tbl.rows || []).filter(row =>
+            const rawRows = (tbl.rows || []).map(row => Array.isArray(row) ? row : (row?.cells || []));
+            const activeRows = rawRows.filter(row =>
               Array.isArray(row) && row.some(cell => cell !== undefined && cell !== null && String(cell).trim() !== '')
             );
             const hasTitle = Boolean(tbl.title && String(tbl.title).trim() !== '');
             const hasHeaders = headers.some(h => h.trim() !== '');
-            const hasRows = rows.length > 0;
+            const hasRows = activeRows.length > 0;
 
             if (hasTitle || hasHeaders || hasRows) {
+              const rowsList = activeRows.length > 0 ? activeRows : [headers.map(() => '')];
               return {
                 id: tbl.id || `table_${Date.now()}_${idx}`,
                 title: tbl.title || `Notification Table #${idx + 1}`,
                 headers: headers.length > 0 ? headers : ['Column 1', 'Column 2', 'Column 3', 'Column 4'],
-                rows: rows.length > 0 ? rows : [headers.map(() => '')]
+                rows: rowsList.map(r => ({
+                  cells: (Array.isArray(r) ? r : (r?.cells || [])).map(c => c !== undefined && c !== null ? String(c) : '')
+                }))
               };
             }
             return null;
@@ -795,50 +805,53 @@ export default function AdminJobEditorScreen({ isMobileFrame }) {
                   </div>
 
                   <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                    {table.rows?.map((row, rIdx) => (
-                      <div key={rIdx} className="bg-white p-2.5 rounded-xl border border-slate-200 space-y-1.5 relative">
-                        <div className="flex items-center justify-between text-[10px] text-slate-500 font-bold border-b border-slate-100 pb-1">
-                          <span>Row #{rIdx + 1}</span>
-                          {table.rows.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newRows = table.rows.filter((_, idx) => idx !== rIdx);
-                                const newTables = [...formData.custom_tables];
-                                newTables[tIdx] = { ...newTables[tIdx], rows: newRows };
-                                setFormData(prev => ({ ...prev, custom_tables: newTables }));
-                              }}
-                              className="text-rose-600 font-extrabold text-[10px] hover:underline"
-                            >
-                              Delete Row
-                            </button>
-                          )}
+                    {table.rows?.map((row, rIdx) => {
+                      const rowCells = Array.isArray(row) ? row : (row?.cells || []);
+                      return (
+                        <div key={rIdx} className="bg-white p-2.5 rounded-xl border border-slate-200 space-y-1.5 relative">
+                          <div className="flex items-center justify-between text-[10px] text-slate-500 font-bold border-b border-slate-100 pb-1">
+                            <span>Row #{rIdx + 1}</span>
+                            {table.rows.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newRows = table.rows.filter((_, idx) => idx !== rIdx);
+                                  const newTables = [...formData.custom_tables];
+                                  newTables[tIdx] = { ...newTables[tIdx], rows: newRows };
+                                  setFormData(prev => ({ ...prev, custom_tables: newTables }));
+                                }}
+                                className="text-rose-600 font-extrabold text-[10px] hover:underline"
+                              >
+                                Delete Row
+                              </button>
+                            )}
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5">
+                            {table.headers?.map((_, cIdx) => (
+                              <input
+                                key={cIdx}
+                                type="text"
+                                value={rowCells[cIdx] || ''}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  const newRows = table.rows.map((r, idx) => {
+                                    if (idx !== rIdx) return r;
+                                    const updatedRow = [...(Array.isArray(r) ? r : (r?.cells || []))];
+                                    updatedRow[cIdx] = val;
+                                    return updatedRow;
+                                  });
+                                  const newTables = [...formData.custom_tables];
+                                  newTables[tIdx] = { ...newTables[tIdx], rows: newRows };
+                                  setFormData(prev => ({ ...prev, custom_tables: newTables }));
+                                }}
+                                placeholder={table.headers[cIdx] || `Col ${cIdx + 1}`}
+                                className="w-full p-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:border-[#FF6B00]"
+                              />
+                            ))}
+                          </div>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5">
-                          {table.headers?.map((_, cIdx) => (
-                            <input
-                              key={cIdx}
-                              type="text"
-                              value={row[cIdx] || ''}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                const newRows = table.rows.map((r, idx) => {
-                                  if (idx !== rIdx) return r;
-                                  const updatedRow = [...r];
-                                  updatedRow[cIdx] = val;
-                                  return updatedRow;
-                                });
-                                const newTables = [...formData.custom_tables];
-                                newTables[tIdx] = { ...newTables[tIdx], rows: newRows };
-                                setFormData(prev => ({ ...prev, custom_tables: newTables }));
-                              }}
-                              placeholder={table.headers[cIdx] || `Col ${cIdx + 1}`}
-                              className="w-full p-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:border-[#FF6B00]"
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>

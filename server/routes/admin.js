@@ -118,6 +118,12 @@ router.get('/jobs', (req, res) => {
 
     const total = db.prepare(`SELECT COUNT(*) as count FROM jobs ${whereClause}`).get(...params).count;
     const rows = db.prepare(`SELECT * FROM jobs ${whereClause} ORDER BY posted_at DESC LIMIT ? OFFSET ?`).all(...params, parseInt(limit), offset);
+    rows.forEach(r => {
+      if (r.skills) { try { r.skills = JSON.parse(r.skills); } catch(e){} }
+      if (r.custom_tables) { try { r.custom_tables = JSON.parse(r.custom_tables); } catch(e){} }
+      if (r.custom_fields) { try { r.custom_fields = JSON.parse(r.custom_fields); } catch(e){} }
+      if (r.custom_table) { try { r.custom_table = JSON.parse(r.custom_table); } catch(e){} }
+    });
 
     res.json({ jobs: rows, total });
   } catch (err) {
@@ -152,6 +158,9 @@ router.post('/jobs', (req, res) => {
       official_notification_url,
       application_url,
       source,
+      custom_tables,
+      custom_fields,
+      custom_table,
       status = 'Published',
       verified = 1,
       featured = 0
@@ -163,6 +172,9 @@ router.post('/jobs', (req, res) => {
 
     const id = 'job_' + Date.now();
     const skillsJson = Array.isArray(skills) ? JSON.stringify(skills) : JSON.stringify([]);
+    const customTablesJson = custom_tables ? JSON.stringify(custom_tables) : null;
+    const customFieldsJson = custom_fields ? JSON.stringify(custom_fields) : null;
+    const customTableJson = custom_table ? JSON.stringify(custom_table) : null;
     const logoUrl = logo || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&auto=format&fit=crop&q=80';
 
     db.prepare(`
@@ -170,18 +182,21 @@ router.post('/jobs', (req, res) => {
         id, title, company, logo, description, category, sub_category, type, location, work_mode,
         salary, stipend, experience, qualification, branch, skills, eligibility, vacancies,
         posted_at, application_start, application_deadline, selection_process,
-        official_notification_url, application_url, source, status, verified, featured
+        official_notification_url, application_url, source, status, verified, featured,
+        custom_tables, custom_fields, custom_table
       ) VALUES (
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?, ?, ?, ?,
         CURRENT_TIMESTAMP, ?, ?, ?,
-        ?, ?, ?, ?, ?, ?
+        ?, ?, ?, ?, ?, ?,
+        ?, ?, ?
       )
     `).run(
       id, title, company, logoUrl, description, category, sub_category || 'General', type, location, work_mode || 'On-site',
       salary || null, stipend || null, experience || 'Fresher', qualification || 'Degree', branch || 'All', skillsJson, eligibility || '', vacancies || 1,
       application_start || new Date().toISOString(), application_deadline, selection_process || '',
-      official_notification_url || '', application_url, source || 'Admin Upload', status, verified ? 1 : 0, featured ? 1 : 0
+      official_notification_url || '', application_url, source || 'Admin Upload', status, verified ? 1 : 0, featured ? 1 : 0,
+      customTablesJson, customFieldsJson, customTableJson
     );
 
     // If Published, broadcast notification to users
@@ -214,10 +229,13 @@ router.put('/jobs/:id', (req, res) => {
       title, company, logo, description, category, sub_category, type, location, work_mode,
       salary, stipend, experience, qualification, branch, skills, eligibility, vacancies,
       application_start, application_deadline, selection_process, official_notification_url,
-      application_url, source, status, verified, featured
+      application_url, source, custom_tables, custom_fields, custom_table, status, verified, featured
     } = req.body;
 
     const skillsJson = Array.isArray(skills) ? JSON.stringify(skills) : undefined;
+    const customTablesJson = custom_tables ? JSON.stringify(custom_tables) : undefined;
+    const customFieldsJson = custom_fields ? JSON.stringify(custom_fields) : undefined;
+    const customTableJson = custom_table ? JSON.stringify(custom_table) : undefined;
 
     db.prepare(`
       UPDATE jobs SET
@@ -246,14 +264,18 @@ router.put('/jobs/:id', (req, res) => {
         source = COALESCE(?, source),
         status = COALESCE(?, status),
         verified = COALESCE(?, verified),
-        featured = COALESCE(?, featured)
+        featured = COALESCE(?, featured),
+        custom_tables = COALESCE(?, custom_tables),
+        custom_fields = COALESCE(?, custom_fields),
+        custom_table = COALESCE(?, custom_table)
       WHERE id = ?
     `).run(
       title, company, logo, description, category, sub_category, type, location, work_mode,
       salary, stipend, experience, qualification, branch, skillsJson, eligibility, vacancies,
       application_start, application_deadline, selection_process, official_notification_url,
       application_url, source, status, verified !== undefined ? (verified ? 1 : 0) : undefined,
-      featured !== undefined ? (featured ? 1 : 0) : undefined, jobId
+      featured !== undefined ? (featured ? 1 : 0) : undefined,
+      customTablesJson, customFieldsJson, customTableJson, jobId
     );
 
     res.json({ message: 'Job notification updated successfully' });

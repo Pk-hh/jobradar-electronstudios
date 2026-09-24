@@ -63,9 +63,17 @@ function initDB() {
       verified INTEGER DEFAULT 1,
       featured INTEGER DEFAULT 0,
       views_count INTEGER DEFAULT 0,
-      clicks_count INTEGER DEFAULT 0
+      clicks_count INTEGER DEFAULT 0,
+      custom_tables TEXT,
+      custom_fields TEXT,
+      custom_table TEXT
     );
   `);
+
+  // Ensure columns exist if table was already created
+  try { db.exec("ALTER TABLE jobs ADD COLUMN custom_tables TEXT"); } catch (e) {}
+  try { db.exec("ALTER TABLE jobs ADD COLUMN custom_fields TEXT"); } catch (e) {}
+  try { db.exec("ALTER TABLE jobs ADD COLUMN custom_table TEXT"); } catch (e) {}
 
   // Saved Jobs Table
   db.exec(`

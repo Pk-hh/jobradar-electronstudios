@@ -130,20 +130,26 @@ export default function AdminJobEditorScreen({ isMobileFrame }) {
         ? formData.skills.split(',').map(s => s.trim()).filter(Boolean)
         : formData.skills;
 
-      // Clean custom_tables payload
+      // Clean custom_tables payload so all valid non-empty tables and rows are preserved
       let cleanedTables = [];
       if (Array.isArray(formData.custom_tables)) {
         cleanedTables = formData.custom_tables
-          .map(tbl => {
+          .map((tbl, idx) => {
             if (!tbl) return null;
-            const activeRows = (tbl.rows || []).filter(row => Array.isArray(row) && row.some(cell => cell && String(cell).trim() !== ''));
-            const activeHeaders = (tbl.headers || []).map(h => h || '');
-            if (activeRows.length > 0 && activeHeaders.some(h => h.trim() !== '')) {
+            const headers = (tbl.headers || []).map(h => h !== undefined && h !== null ? String(h) : '');
+            const rows = (tbl.rows || []).filter(row =>
+              Array.isArray(row) && row.some(cell => cell !== undefined && cell !== null && String(cell).trim() !== '')
+            );
+            const hasTitle = Boolean(tbl.title && String(tbl.title).trim() !== '');
+            const hasHeaders = headers.some(h => h.trim() !== '');
+            const hasRows = rows.length > 0;
+
+            if (hasTitle || hasHeaders || hasRows) {
               return {
-                id: tbl.id || `table_${Date.now()}_${Math.random()}`,
-                title: tbl.title || 'Detail Table',
-                headers: activeHeaders,
-                rows: activeRows
+                id: tbl.id || `table_${Date.now()}_${idx}`,
+                title: tbl.title || `Notification Table #${idx + 1}`,
+                headers: headers.length > 0 ? headers : ['Column 1', 'Column 2', 'Column 3', 'Column 4'],
+                rows: rows.length > 0 ? rows : [headers.map(() => '')]
               };
             }
             return null;

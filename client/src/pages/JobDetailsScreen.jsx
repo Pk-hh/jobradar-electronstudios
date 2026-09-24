@@ -156,10 +156,11 @@ export default function JobDetailsScreen() {
   const validTables = displayTables.filter(tbl => {
     return (
       tbl &&
-      Array.isArray(tbl.headers) &&
-      tbl.headers.some(h => typeof h === 'string' && h.trim() !== '') &&
-      Array.isArray(tbl.rows) &&
-      tbl.rows.some(r => Array.isArray(r) && r.some(c => typeof c === 'string' && c.trim() !== ''))
+      (
+        (Array.isArray(tbl.headers) && tbl.headers.some(h => h !== undefined && h !== null && String(h).trim() !== '')) ||
+        (Array.isArray(tbl.rows) && tbl.rows.some(r => Array.isArray(r) && r.some(c => c !== undefined && c !== null && String(c).trim() !== ''))) ||
+        (tbl.title && String(tbl.title).trim() !== '')
+      )
     );
   });
   const showCustomTables = validTables.length > 0;

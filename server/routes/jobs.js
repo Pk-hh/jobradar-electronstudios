@@ -238,10 +238,20 @@ router.get('/:id', (req, res) => {
     let parsedSkills = [];
     try { parsedSkills = JSON.parse(job.skills || '[]'); } catch(e){}
 
+    let customTables = null;
+    let customFields = null;
+    let customTable = null;
+    if (job.custom_tables) { try { customTables = JSON.parse(job.custom_tables); } catch(e){} }
+    if (job.custom_fields) { try { customFields = JSON.parse(job.custom_fields); } catch(e){} }
+    if (job.custom_table) { try { customTable = JSON.parse(job.custom_table); } catch(e){} }
+
     res.json({
       job: {
         ...job,
         skills: parsedSkills,
+        custom_tables: customTables,
+        custom_fields: customFields,
+        custom_table: customTable,
         is_saved: isSaved,
         user_application_status: applicationState,
         is_expired: new Date(job.application_deadline) < new Date()

@@ -154,14 +154,14 @@ export default function JobDetailsScreen() {
   }
 
   const validTables = displayTables.filter(tbl => {
-    return (
-      tbl &&
-      (
-        (Array.isArray(tbl.headers) && tbl.headers.some(h => h !== undefined && h !== null && String(h).trim() !== '')) ||
-        (Array.isArray(tbl.rows) && tbl.rows.some(r => Array.isArray(r) && r.some(c => c !== undefined && c !== null && String(c).trim() !== ''))) ||
-        (tbl.title && String(tbl.title).trim() !== '')
-      )
-    );
+    if (!tbl) return false;
+    const hasHeaders = Array.isArray(tbl.headers) && tbl.headers.some(h => h !== undefined && h !== null && String(h).trim() !== '');
+    const hasTitle = Boolean(tbl.title && String(tbl.title).trim() !== '');
+    const hasRows = Array.isArray(tbl.rows) && tbl.rows.some(r => {
+      const cells = Array.isArray(r) ? r : (r?.cells || []);
+      return Array.isArray(cells) && cells.some(c => c !== undefined && c !== null && String(c).trim() !== '');
+    });
+    return hasHeaders || hasTitle || hasRows;
   });
   const showCustomTables = validTables.length > 0;
 
@@ -329,13 +329,16 @@ export default function JobDetailsScreen() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {table.rows.map((row, rIdx) => {
-                      if (!Array.isArray(row) || row.every(c => !c || String(c).trim() === '')) return null;
+                    {table.rows?.map((rowItem, rIdx) => {
+                      const rowCells = Array.isArray(rowItem) ? rowItem : (rowItem?.cells || []);
+                      if (!Array.isArray(rowCells) || rowCells.length === 0 || rowCells.every(c => c === undefined || c === null || String(c).trim() === '')) {
+                        return null;
+                      }
                       return (
                         <tr key={rIdx} className="odd:bg-slate-50/60 even:bg-white hover:bg-orange-50/30 transition-colors">
-                          {row.map((cell, cIdx) => (
+                          {rowCells.map((cell, cIdx) => (
                             <td key={cIdx} className="p-3 font-medium text-slate-700 whitespace-pre-line align-top">
-                              {cell || '-'}
+                              {cell !== undefined && cell !== null && String(cell).trim() !== '' ? String(cell) : '-'}
                             </td>
                           ))}
                         </tr>

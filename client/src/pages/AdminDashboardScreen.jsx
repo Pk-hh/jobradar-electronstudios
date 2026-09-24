@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ShieldCheck, PlusCircle, Bell, RefreshCw, Eye, MousePointerClick, CheckCircle2,
-  AlertTriangle, Trash2, Edit3, Search, Filter, Calendar, ExternalLink, Upload, FolderCheck, FileText, Image, Building, CloudUpload, MapPin, Table
+  AlertTriangle, Trash2, Edit3, Search, Filter, Calendar, ExternalLink, Upload, FolderCheck, FileText, Image, Building, CloudUpload, MapPin, Table, Sparkles
 } from 'lucide-react';
 import { adminApi } from '../services/api';
 import { firebaseService, isFirebaseConfigured } from '../services/firebaseService';
